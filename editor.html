@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PBInfo Expert Lab - Algoritmi Elementari</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6; --bg: #0f172a; --panel: #1e293b;
+            --text: #f8fafc; --accent: #0ea5e9; --success: #10b981;
+            --danger: #ef4444; --warning: #f59e0b;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* Navigation */
+        .top-bar { background: #1e293b; padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; }
+        .problem-selector { background: #0f172a; border: 1px solid #334155; color: white; padding: 5px 10px; border-radius: 4px; }
+
+        .main-container { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Left Panel: Problem & Logic */
+        .sidebar { width: 400px; border-right: 1px solid #334155; display: flex; flex-direction: column; background: var(--panel); }
+        .problem-info { padding: 1.5rem; border-bottom: 1px solid #334155; }
+        
+        .logic-area { padding: 1.5rem; flex: 1; overflow-y: auto; background: #111827; }
+        .block-container { 
+            background: #020617; padding: 15px; border-radius: 8px; min-height: 180px; 
+            margin: 10px 0; border: 2px dashed #334155; display: flex; flex-direction: column; gap: 8px;
+        }
+        .logic-block { 
+            background: #2563eb; padding: 10px 15px; border-radius: 6px; cursor: grab; 
+            font-family: 'Fira Code'; font-size: 0.85rem; border-left: 4px solid #60a5fa;
+            user-select: none; transition: transform 0.2s;
+        }
+        .logic-block:active { cursor: grabbing; transform: scale(0.98); }
+        
+        /* Editor & Terminal */
+        .workspace { flex: 1; display: flex; flex-direction: column; }
+        #monaco-container { flex: 1; }
+        .terminal { 
+            height: 220px; background: #000; border-top: 2px solid #334155; 
+            padding: 10px; font-family: 'Fira Code', monospace; font-size: 0.85rem;
+            overflow-y: auto;
+        }
+
+        /* Status Elements */
+        .status-tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: bold; }
+        .tag-easy { background: var(--success); color: #000; }
+        
+        .btn-action { 
+            background: var(--success); color: white; border: none; padding: 8px 16px; 
+            border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px;
+        }
+        .btn-action:hover { filter: brightness(1.1); }
+        
+        .hint-box { background: #1e293b; border-left: 4px solid var(--accent); padding: 10px; margin-top: 10px; font-size: 0.85rem; color: #94a3b8; }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div style="display:flex; align-items:center; gap:15px;">
+        <span style="letter-spacing: 1px; font-weight: 800; color: var(--accent);">PBINFO_LAB v2.0</span>
+        <select class="problem-selector">
+            <option>#10 nrcif - Numărul de cifre</option>
+            <option>#46 sumapare - Suma pare</option>
+            <option>#1391 oglindit - Oglindit număr</option>
+        </select>
+    </div>
+    <div style="display:flex; gap:10px;">
+        <button class="btn-action" style="background: #475569;" onclick="resetExercise()">↺ RESET</button>
+        <button class="btn-action" onclick="runTests()">▶ VERIFICĂ SOLUȚIA</button>
+    </div>
+</div>
+
+<div class="main-container">
+    <div class="sidebar">
+        <div class="problem-info">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0; color:var(--accent);">#10 nrcif</h2>
+                <span class="status-tag tag-easy">Ușoară</span>
+            </div>
+            <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 10px;">
+                Se dă un număr natural <code>n</code>. Să se determine câte cifre are acesta.
+            </p>
+            <div class="hint-box">
+                <b>Tips:</b> Nu uita de cazul <code>n = 0</code>! De asemenea, folosirea lui <code>while</code> este ideală pentru "tăierea" cifrelor.
+            </div>
+        </div>
+
+        <div class="logic-area">
+            <h4 style="margin: 0 0 10px 0; font-size: 0.9rem; color: #60a5fa;">STRATEGIE (Drag & Drop)</h4>
+            <div class="block-container" id="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)">
+                </div>
+            
+            <h4 style="margin: 20px 0 10px 0; font-size: 0.9rem; color: #94a3b8;">COMPONENTE ALGORITM</h4>
+            <div id="source-blocks" style="display:flex; flex-wrap:wrap; gap:5px;">
+                <div class="logic-block" draggable="true" ondragstart="drag(event)" id="b_input">cin >> n;</div>
+                <div class="logic-block" draggable="true" ondragstart="drag(event)" id="b_while">while (n > 0)</div>
+                <div class="logic-block" draggable="true" ondragstart="drag(event)" id="b_cut">n /= 10;</div>
+                <div class="logic-block" draggable="true" ondragstart="drag(event)" id="b_count">nr_cif++;</div>
+                <div class="logic-block" draggable="true" ondragstart="drag(event)" id="b_zero">if (n == 0) nr_cif = 1;</div>
+            </div>
+
+            
+        </div>
+    </div>
+
+    <div class="workspace">
+        <div style="background: #1e1e1e; padding: 5px 15px; border-bottom: 1px solid #334155; font-size: 0.8rem; display:flex; gap:20px;">
+            <span style="color: var(--accent); border-bottom: 2px solid var(--accent); padding: 5px 0;">solution.cpp</span>
+            <span style="color: #64748b; padding: 5px 0;">output.log</span>
+        </div>
+        <div id="monaco-container"></div>
+        <div class="terminal" id="terminal">
+            <div style="color: #475569;">// Așteptare input...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let editor;
+    const correctOrder = ["b_input", "b_zero", "b_while", "b_count", "b_cut"];
+    
+    // Initial Code Template
+    const codeTemplate = `#include <iostream>\nusing namespace std;\n\nint main() {\n    long long n;\n    int nr_cif = 0;\n\n    // --- Adaugă logica aici ---\n\n\n    cout << nr_cif;\n    return 0;\n}`;
+
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+    require(['vs/editor/editor.main'], function () {
+        editor = monaco.editor.create(document.getElementById('monaco-container'), {
+            value: codeTemplate,
+            language: 'cpp',
+            theme: 'vs-dark',
+            automaticLayout: true,
+            fontSize: 15,
+            lineNumbers: "on",
+            roundedSelection: true,
+            scrollBeyondLastLine: false,
+            readOnly: false,
+            minimap: { enabled: false }
+        });
+    });
+
+    // Drag and Drop with Code Coupling
+    function allowDrop(ev) { ev.preventDefault(); }
+    function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+    
+    function drop(ev) {
+        ev.preventDefault();
+        const data = ev.dataTransfer.getData("text");
+        const block = document.getElementById(data);
+        const dropZone = document.getElementById('drop-zone');
+        
+        if (ev.target.id === "drop-zone" || ev.target.closest("#drop-zone")) {
+            dropZone.appendChild(block);
+            updateEditorFromBlocks();
+        }
+    }
+
+    function updateEditorFromBlocks() {
+        const blocks = Array.from(document.getElementById('drop-zone').children);
+        let logicCode = "";
+        
+        blocks.forEach(b => {
+            let indent = "";
+            if (b.id === "b_count" || b.id === "b_cut") indent = "        ";
+            else indent = "    ";
+            
+            if (b.id === "b_while") {
+                logicCode += `    while (n > 0) {\n`;
+            } else if (b.id === "b_count") {
+                logicCode += `        nr_cif++;\n`;
+            } else if (b.id === "b_cut") {
+                logicCode += `        n /= 10;\n    }\n`;
+            } else {
+                logicCode += `    ${b.innerText}\n`;
+            }
+        });
+
+        const newCode = `#include <iostream>\nusing namespace std;\n\nint main() {\n    long long n;\n    int nr_cif = 0;\n\n${logicCode}\n    cout << nr_cif;\n    return 0;\n}`;
+        editor.setValue(newCode);
+    }
+
+    function runTests() {
+        const terminal = document.getElementById('terminal');
+        const blocks = Array.from(document.getElementById('drop-zone').children).map(b => b.id);
+        
+        terminal.innerHTML = `<div style="color: #fbbf24;">> Compilare și testare...</div>`;
+        
+        setTimeout(() => {
+            // Check logic order
+            const isLogicCorrect = JSON.stringify(blocks) === JSON.stringify(correctOrder);
+            
+            if (blocks.length < 5) {
+                terminal.innerHTML += `<div style="color: var(--danger);">✖ Eroare: Algoritm incomplet! Pune toate blocurile.</div>`;
+            } else if (!isLogicCorrect) {
+                terminal.innerHTML += `<div style="color: var(--warning);">⚠ Logică incorectă: Ordinea blocurilor contează pentru fluxul de execuție!</div>`;
+                terminal.innerHTML += `<div style="color: #64748b; font-size: 0.75rem;">Sfat: Citește -> Verifică 0 -> Începe bucla.</div>`;
+            } else {
+                terminal.innerHTML += `<div style="color: var(--success);">✔ Test 1 (n=123): Output 3 - OK</div>`;
+                terminal.innerHTML += `<div style="color: var(--success);">✔ Test 2 (n=0): Output 1 - OK</div>`;
+                terminal.innerHTML += `<div style="color: var(--success);">✔ Test 3 (n=10000): Output 5 - OK</div>`;
+                terminal.innerHTML += `<div style="margin-top:10px; font-weight:bold; color:var(--accent);">SCOR FINAL: 100 PUNCTE</div>`;
+            }
+            terminal.scrollTop = terminal.scrollHeight;
+        }, 800);
+    }
+
+    function resetExercise() {
+        location.reload();
+    }
+</script>
+
+</body>
+</html>

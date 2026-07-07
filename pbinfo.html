@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EDU-LAB IX • Lecții + Probleme PBInfo</title>
+
+  <!-- Monaco -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #0b1220;
+      --panel: rgba(255,255,255,0.06);
+      --panel2: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.10);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.65);
+      --muted2: rgba(255,255,255,0.50);
+
+      --blue: #60a5fa;
+      --cyan: #22d3ee;
+      --green: #34d399;
+      --amber: #fbbf24;
+      --red: #fb7185;
+
+      --chip: rgba(255,255,255,0.10);
+      --shadow: 0 18px 40px rgba(0,0,0,0.35);
+      --radius: 16px;
+      --radius2: 12px;
+    }
+
+    *{ box-sizing: border-box; }
+    body{
+      margin:0; height:100vh; overflow:hidden;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1100px 650px at 20% 10%, rgba(96,165,250,0.25), transparent 60%),
+        radial-gradient(900px 600px at 80% 20%, rgba(34,211,238,0.18), transparent 60%),
+        radial-gradient(900px 700px at 55% 110%, rgba(52,211,153,0.10), transparent 55%),
+        linear-gradient(180deg, #070b14 0%, #0b1220 55%, #0b1220 100%);
+    }
+
+    /* Layout */
+    .app{
+      display:flex; height:100%;
+    }
+    .sidebar{
+      width: 380px;
+      padding: 14px;
+      border-right: 1px solid var(--border);
+      background: rgba(0,0,0,0.20);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+      display:flex; flex-direction:column; gap:12px;
+    }
+    .main{
+      flex:1; display:flex; flex-direction:column; gap:12px;
+      padding: 14px;
+      overflow:hidden;
+    }
+
+    /* Top bar */
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 12px 14px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+    }
+    .brand .logo{
+      width:38px; height:38px; border-radius: 12px;
+      background: linear-gradient(135deg, rgba(96,165,250,0.9), rgba(34,211,238,0.55));
+      box-shadow: 0 10px 25px rgba(96,165,250,0.20);
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+    .brand h1{
+      margin:0; font-size: 1rem; letter-spacing:0.2px;
+    }
+    .brand .sub{
+      font-size: 0.78rem; color: var(--muted);
+      margin-top:2px;
+    }
+    .actions{ display:flex; gap:10px; align-items:center; }
+    .btn{
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease;
+      user-select:none;
+    }
+    .btn:hover{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.18); }
+    .btn:active{ transform: scale(0.98); }
+    .btn.primary{
+      border: 1px solid rgba(52,211,153,0.40);
+      background: linear-gradient(135deg, rgba(52,211,153,0.22), rgba(34,211,238,0.10));
+    }
+    .btn.danger{
+      border: 1px solid rgba(251,113,133,0.38);
+      background: rgba(251,113,133,0.10);
+    }
+
+    /* Sidebar panels */
+    .card{
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding: 12px 12px;
+      border-bottom: 1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+    }
+    .card .hd .title{
+      font-size: 0.85rem; font-weight: 800; letter-spacing:0.4px;
+      color: rgba(255,255,255,0.9);
+    }
+    .card .bd{ padding: 12px; }
+
+    .chip{
+      display:inline-flex; align-items:center; gap:6px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: var(--chip);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--muted);
+      font-size: 0.74rem;
+      white-space:nowrap;
+    }
+    .dot{
+      width:7px; height:7px; border-radius:999px; background: var(--muted2);
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.06);
+    }
+    .dot.easy{ background: var(--green); }
+    .dot.medium{ background: var(--amber); }
+    .dot.hard{ background: #a78bfa; }
+    .dot.contest{ background: var(--red); }
+
+    /* Search + filters */
+    .searchRow{ display:flex; gap:10px; }
+    .search{
+      flex:1;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.25);
+      color: var(--text);
+      outline:none;
+    }
+    .select{
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.25);
+      color: var(--text);
+      outline:none;
+      min-width: 140px;
+    }
+
+    .problemList{
+      max-height: calc(100vh - 260px);
+      overflow:auto;
+      padding-right: 4px;
+    }
+    .pitem{
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      background: rgba(255,255,255,0.04);
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      cursor:pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
+      margin-bottom: 8px;
+    }
+    .pitem:hover{ background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.14); }
+    .pitem:active{ transform: scale(0.995); }
+    .pitem.active{
+      background: linear-gradient(135deg, rgba(96,165,250,0.20), rgba(34,211,238,0.08));
+      border-color: rgba(96,165,250,0.45);
+    }
+    .pmeta{ display:flex; flex-direction:column; gap:4px; }
+    .pmeta .nm{ font-weight: 800; font-size: 0.88rem; }
+    .pmeta .sub{
+      font-size: 0.75rem; color: var(--muted);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 245px;
+    }
+    .rightMeta{ display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+    .badge{
+      font-size: 0.72rem; font-weight:800;
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.88);
+    }
+    .badge.easy{ border-color: rgba(52,211,153,0.35); background: rgba(52,211,153,0.10); }
+    .badge.medium{ border-color: rgba(251,191,36,0.35); background: rgba(251,191,36,0.10); }
+    .badge.hard{ border-color: rgba(167,139,250,0.35); background: rgba(167,139,250,0.12); }
+    .badge.contest{ border-color: rgba(251,113,133,0.35); background: rgba(251,113,133,0.12); }
+
+    .tiny{
+      font-size: 0.72rem; color: var(--muted2);
+    }
+
+    /* Main content split */
+    .contentRow{
+      flex:1;
+      display:flex; gap:12px; overflow:hidden;
+    }
+    .lessonCol{
+      width: 46%;
+      display:flex; flex-direction:column; gap:12px;
+      overflow:hidden;
+    }
+    .codeCol{
+      flex:1;
+      display:flex; flex-direction:column; gap:12px;
+      overflow:hidden;
+    }
+
+    /* Lesson card styles */
+    .lessonHead{
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .hTitle{
+      margin:0;
+      font-size: 1.25rem;
+      letter-spacing:0.2px;
+    }
+    .hSubRow{
+      display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+    }
+    .kv{
+      display:flex; gap:8px; flex-wrap:wrap;
+      margin-top: 2px;
+    }
+    .kv .chip{ color: rgba(255,255,255,0.85); }
+    .sectionTitle{
+      font-size: 0.78rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 10px 0;
+      font-weight: 900;
+    }
+    .callout{
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+    .callout p{ margin:0; color: rgba(255,255,255,0.86); line-height:1.55; font-size:0.92rem; }
+    .grid2{
+      display:grid; grid-template-columns: 1fr 1fr; gap:10px;
+    }
+    .miniCard{
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+    .miniCard .t{ font-weight: 900; font-size: 0.80rem; color: rgba(255,255,255,0.88); margin-bottom:8px; }
+    .miniCard .b{ font-size: 0.86rem; color: rgba(255,255,255,0.80); line-height:1.5; }
+
+    details{
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      overflow:hidden;
+    }
+    summary{
+      cursor:pointer;
+      padding: 12px;
+      list-style:none;
+      display:flex; align-items:center; justify-content:space-between;
+      font-weight: 900;
+      color: rgba(255,255,255,0.88);
+    }
+    summary::-webkit-details-marker{ display:none; }
+    details .dBody{
+      padding: 0 12px 12px 12px;
+      color: rgba(255,255,255,0.80);
+      line-height:1.55;
+      font-size:0.90rem;
+    }
+
+    /* Logic builder */
+    .logicWrap{
+      display:flex; flex-direction:column; gap:10px;
+      overflow:hidden;
+    }
+    .logicZone{
+      min-height: 140px;
+      border-radius: 16px;
+      border: 2px dashed rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.20);
+      padding: 10px;
+      overflow:auto;
+    }
+    .logicSrc{
+      display:flex; flex-wrap:wrap; gap:8px;
+      max-height: 140px; overflow:auto; padding-right:4px;
+    }
+    .block{
+      user-select:none;
+      cursor: grab;
+      font-family: "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85rem;
+      padding: 9px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.92);
+      transition: transform 0.08s ease, border-color 0.15s ease, background 0.15s ease;
+      white-space:nowrap;
+    }
+    .block:hover{
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(96,165,250,0.35);
+    }
+    .block:active{ transform: scale(0.98); }
+
+    /* Monaco + terminal */
+    .editorCard{
+      flex:1; display:flex; flex-direction:column; overflow:hidden;
+    }
+    #monaco{
+      flex:1;
+      border-radius: var(--radius);
+      overflow:hidden;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    .terminal{
+      height: 210px;
+      border-radius: var(--radius);
+      overflow:auto;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.35);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      font-family: "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.86rem;
+      line-height:1.45;
+      color: rgba(255,255,255,0.90);
+    }
+    .termMuted{ color: rgba(255,255,255,0.55); }
+    .ok{ color: var(--green); }
+    .warn{ color: var(--amber); }
+    .err{ color: var(--red); }
+    .info{ color: var(--cyan); }
+
+    /* Small helpers */
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .spacer{ flex:1; }
+    .link{
+      color: rgba(96,165,250,0.95);
+      text-decoration:none;
+      border-bottom: 1px dashed rgba(96,165,250,0.45);
+    }
+    .link:hover{ border-bottom-style:solid; }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar{ width: 10px; height:10px; }
+    ::-webkit-scrollbar-thumb{
+      background: rgba(255,255,255,0.12);
+      border: 2px solid rgba(0,0,0,0.25);
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover{ background: rgba(255,255,255,0.18); }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="card">
+        <div class="hd">
+          <div class="title">Navigator probleme PBInfo</div>
+          <span class="chip"><span class="dot"></span><span id="countLabel">—</span></span>
+        </div>
+        <div class="bd">
+          <div class="searchRow">
+            <input id="q" class="search" placeholder="Caută: #id, nume, capitol (ex: paritate, maxime)"/>
+            <select id="filterCat" class="select">
+              <option value="all">Toate capitolele</option>
+              <option value="decizie">Structura de decizie</option>
+              <option value="maxmin">Maxime și minime</option>
+              <option value="sumprod">Sume, produse, numărări</option>
+              <option value="loop">Structuri repetitive</option>
+            </select>
+          </div>
+          <div class="searchRow" style="margin-top:10px;">
+            <select id="filterDiff" class="select" style="flex:1;">
+              <option value="all">Toate dificultățile</option>
+              <option value="easy">Ușoară</option>
+              <option value="medium">Medie</option>
+              <option value="hard">Dificilă</option>
+              <option value="contest">Concurs</option>
+            </select>
+            <button class="btn" onclick="resetFilters()">Reset</button>
+          </div>
+
+          <div style="margin-top:12px;" class="row">
+            <span class="chip"><span class="dot easy"></span>Ușoară</span>
+            <span class="chip"><span class="dot medium"></span>Medie</span>
+            <span class="chip"><span class="dot hard"></span>Dificilă</span>
+            <span class="chip"><span class="dot contest"></span>Concurs</span>
+          </div>
+
+          <div class="problemList" id="plist" style="margin-top:12px;"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd">
+          <div class="title">Mod lecție (pentru clasă)</div>
+          <span class="chip"><span class="dot" style="background:rgba(96,165,250,0.9)"></span>Plan</span>
+        </div>
+        <div class="bd">
+          <div class="tiny" style="line-height:1.45;">
+            Această interfață separă:
+            <b>Teorie</b> → <b>Algoritm (blocuri)</b> → <b>Cod</b> → <b>Verificare</b>.
+            Poți proiecta pe tablă partea din stânga, iar elevii lucrează la blocuri + cod.
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <button class="btn" onclick="toggleTeacherNotes()">Note profesor</button>
+            <button class="btn danger" onclick="clearProgress()">Reset progres</button>
+          </div>
+          <div id="teacherNotes" class="callout" style="margin-top:10px; display:none;">
+            <p>
+              Sugestie flux 30–40 min:
+              <br>1) 3 min: „Obiective + concept”
+              <br>2) 7 min: blocuri pseudocod (fără C++)
+              <br>3) 10 min: transformare în cod C++
+              <br>4) 10 min: cazuri-limită + testare
+              <br>5) 5 min: recapitulare (pattern-ul problemei)
+            </p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo"></div>
+          <div>
+            <h1 style="margin:0;">EDU-LAB IX • Lecții + PBInfo</h1>
+            <div class="sub">Decizie • Max/Min • Sume/Produse • Repetitive</div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" onclick="openPbinfo()">Deschide PBInfo</button>
+          <button class="btn primary" onclick="runSimulation()">VERIFICĂ</button>
+        </div>
+      </div>
+
+      <div class="contentRow">
+        <!-- LESSON -->
+        <section class="lessonCol">
+          <div class="card" style="flex:1; overflow:auto;">
+            <div class="bd">
+              <div class="lessonHead">
+                <h2 class="hTitle" id="pTitle">—</h2>
+                <div class="hSubRow">
+                  <span class="chip" id="pChipCat"><span class="dot"></span><span>—</span></span>
+                  <span class="chip" id="pChipDiff"><span class="dot"></span><span>—</span></span>
+                  <span class="chip"><span class="dot" style="background:rgba(255,255,255,0.45)"></span><span id="pIdLabel">#—</span></span>
+                  <span class="chip"><span class="dot" style="background:rgba(52,211,153,0.9)"></span><span id="pStatus">Neînceput</span></span>
+                </div>
+
+                <div class="callout">
+                  <p id="pDesc">—</p>
+                  <div class="tiny" style="margin-top:10px;">
+                    Enunț complet: <a class="link" href="#" id="pbLink" target="_blank" rel="noopener">pbinfo.ro</a>
+                  </div>
+                </div>
+
+                <div class="grid2">
+                  <div class="miniCard">
+                    <div class="t">Obiective lecție</div>
+                    <div class="b" id="pObj">—</div>
+                  </div>
+                  <div class="miniCard">
+                    <div class="t">Concept-cheie</div>
+                    <div class="b" id="pTheory">—</div>
+                  </div>
+                </div>
+
+                <details open>
+                  <summary>Checklist de implementare <span class="tiny">(+ cazuri-limită)</span></summary>
+                  <div class="dBody" id="pChecklist">—</div>
+                </details>
+
+                <details>
+                  <summary>Exemplu (I/O) <span class="tiny">— orientativ</span></summary>
+                  <div class="dBody" id="pExample">—</div>
+                </details>
+
+                <div class="logicWrap">
+                  <div>
+                    <div class="sectionTitle">Algoritm din blocuri (pseudocod → C++)</div>
+                    <div class="tiny" style="margin-bottom:10px;">
+                      Trage blocurile în zona punctată în ordinea execuției. Dacă problema nu are „pattern” definit,
+                      blocurile sunt dezactivate și folosești direct editorul.
+                    </div>
+
+                    <div class="logicZone" id="dropZone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+                    <div class="sectionTitle" style="margin-top:12px;">Blocuri disponibile</div>
+                    <div class="logicSrc" id="srcBlocks"></div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CODE -->
+        <section class="codeCol">
+          <div class="editorCard" style="flex:1;">
+            <div id="monaco"></div>
+          </div>
+          <div class="terminal" id="terminal">
+            <div class="termMuted">// Consola EDU-LAB: verificare logică (blocuri) + feedback rapid</div>
+            <div class="termMuted">// Pentru evaluare reală cu teste PBInfo: conectează ulterior un runner / judge.</div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+<script>
+/* =========================================================
+   1) Data model (adaugă probleme masiv, dar „pattern-based”)
+   ========================================================= */
+
+const CAT_LABEL = {
+  decizie: "Structura de decizie",
+  maxmin: "Maxime și minime",
+  sumprod: "Sume • Produse • Numărări",
+  loop: "Structuri repetitive"
+};
+
+const DIFF_LABEL = {
+  easy: "Ușoară",
+  medium: "Medie",
+  hard: "Dificilă",
+  contest: "Concurs"
+};
+
+// Helper: pbinfo link format
+function pbUrl(id){ return `https://www.pbinfo.ro/probleme/${id}`; }
+
+/*
+  PATTERNS:
+  - max2, minim3, paritate, sumapare, factorial, gauss
+  - max_in_seq_until0, min_pos_until0, n_maxim, sum_max_min, difMin (pair min abs diff)
+  - generic (no blocks)
+*/
+const PATTERNS = {
+  max2: {
+    objectives: "Aplici <b>if/else</b> pentru a alege maximul dintre două valori.",
+    theory: "Comparația <code>a &gt; b</code> decide ramura. Ai exact două rezultate posibile.",
+    checklist: `
+      <ul>
+        <li>Citești <code>a</code>, <code>b</code>.</li>
+        <li>Compari: <code>if (a &gt; b)</code>.</li>
+        <li>Afișezi valoarea corectă.</li>
+        <li>Caz-limită: <code>a == b</code> (ambele sunt maxime).</li>
+      </ul>
+    `,
+    example: `<code>Intrare: 5 9</code> → <code>Ieșire: 9</code>`,
+    blocks: [
+      { id:'in', text:'cin >> a >> b;' },
+      { id:'if', text:'if (a > b)' },
+      { id:'out_a', text:'cout << a;' },
+      { id:'else', text:'else' },
+      { id:'out_b', text:'cout << b;' }
+    ],
+    correct: ['in','if','out_a','else','out_b'],
+    template: (logic)=>`#include <iostream>
+using namespace std;
+
+int main(){
+    long long a,b;
+${logic}
+    return 0;
+}`
+  },
+
+  minim3: {
+    objectives: "Construiești o selecție pentru <b>minimul dintre trei</b> numere (if-uri în lanț).",
+    theory: "Inițializezi <code>m=a</code>, apoi actualizezi cu <code>if (b&lt;m) m=b;</code> etc.",
+    checklist: `
+      <ul>
+        <li>Citești <code>a,b,c</code>.</li>
+        <li>Setezi <code>m=a</code>.</li>
+        <li>Actualizezi cu <code>b</code> și <code>c</code>.</li>
+        <li>Afișezi <code>m</code>.</li>
+      </ul>
+    `,
+    example: `<code>Intrare: 7 2 9</code> → <code>Ieșire: 2</code>`,
+    blocks: [
+      { id:'in', text:'cin >> a >> b >> c;' },
+      { id:'init', text:'m = a;' },
+      { id:'ifb', text:'if (b < m) m = b;' },
+      { id:'ifc', text:'if (c < m) m = c;' },
+      { id:'out', text:'cout << m;' }
+    ],
+    correct: ['in','init','ifb','ifc','out'],
+    template: (logic)=>`#include <iostream>
+using namespace std;
+
+int main(){
+    long long a,b,c,m;
+${logic}
+    return 0;
+}`
+  },
+
+  paritate: {
+    objectives: "Verifici <b>paritatea</b> folosind operatorul <code>%</code>.",
+    theory: "<code>n % 2</code> este 0 pentru numere pare și 1 pentru impare.",
+    checklist: `
+      <ul>
+        <li>Citești <code>n</code>.</li>
+        <li>Testezi <code>n % 2 == 0</code>.</li>
+        <li>Afișezi „par” / „impar” (sau 0/1, conform enunțului real).</li>
+      </ul>
+    `,
+    example: `<code>Intrare: 17</code> → <code>Ieșire: impar</code>`,
+    blocks: [
+      { id:'in', text:'cin >> n;' },
+      { id:'if', text:'if (n % 2 == 0)' },
+      { id:'out_p', text:'cout << "par";' },
+      { id:'else', text:'else' },
+      { id:'out_i', text:'cout << "impar";' }
+    ],
+    correct: ['in','if','out_p','else','out_i'],
+    template: (logic)=>`#include <iostream>
+using namespace std;
+
+int main(){
+    long long n;
+${logic}
+    return 0;
+}`
+  },
+
+  sumapare: {
+    objectives: "Aplici o formulă: suma primelor <b>n numere pare</b>.",
+    theory: "Primele n pare sunt: 2,4,6,...,2n. Suma este <code>n(n+1)</code>.",
+    checklist: `
+      <ul>
+        <li>Citești <code>n</code>.</li>
+        <li>Calculezi <code>S = n*(n+1)</code>.</li>
+        <li>Afișezi <code>S</code> (atenție la tip: <code>long long</code>).</li>
+      </ul>
+    `,
+    example: `<code>Intrare: 3</code> → <code>Ieșire: 12</code> (2+4+6)`,
+    blocks: [
+      { id:'in', text:'cin >> n;' },
+      { id:'calc', text:'S = n * (n + 1);' },
+      { id:'out', text:'cout << S;' }
+    ],
+    correct: ['in','calc','out'],
+    template: (logic)=>`#include <iostream>
+using namespace std;
+
+int main(){
+    long long n, S=0;
+${logic}
+    return 0;
+}`
+  },
+
+  factorial: {
+    objectives: "Calculezi <b>n!</b> cu o buclă (introducere spre repetitive).",
+    theory: "Factorial: <code>n! = 1·2·...·n</code>. Pentru n mare, folosești <code>long long</code> (până la 20!).",
+    checklist: `
+      <ul>
+        <li>Citești <code>n</code>.</li>
+        <li>Inițializezi <code>p=1</code>.</li>
+        <li>Înmulțești de la 2 la n.</li>
+        <li>Afișezi <code>p</code>.</li>
+      </ul>
+    `,
+    example: `<code>Intrare: 5</code> → <code>Ieșire: 120</code>`,
+    blocks: [
+      { id:'in', text:'cin >> n;' },
+      { id:'init', text:'p = 1;' },
+      { id:'for', text:'for (int i = 2; i <= n; i++) p *= i;' },
+      { id:'out', text:'cout << p;' }
+    ],
+    correct: ['in','init','for','out'],
+    template: (logic)=>`#include <iostream>
+using namespace std;
+
+int main(){
+    long long n, p;
+${logic}
+    return 0;
+}`
+  },
+
+  max_in_seq_until0: {
+    objectives: "Agregi o secvență: <b>maxim până la 0</b> (sentinelă).",
+    theory: "Citești repetat valori până la 0. Menții un maxim curent.",
+    checklist: `
+      <ul>
+        <li>Citești repetat <code>x</code> până la <code>x==0</code>.</li>
+        <li>Actualizezi maximul: <code>mx=max(mx,x)</code>.</li>
+        <li>Afișezi <code>mx</code>.</li>
+      </ul>
+    `,
+    example: `<code>Intrare: 3 9 2 0</code> → <code>Ieșire: 9</code>`,
+    blocks: [
+      { id:'init', text:'mx = LLONG_MIN;' },
+      { id:'loop', text:'while (cin >> x && x != 0)' },
+      { id:'upd', text:'mx = max(mx, x);' },
+      { id:'out', text:'cout << mx;' }
+    ],
+    correct: ['init','loop','upd','out'],
+    template: (logic)=>`#include <iostream>
+#include <climits>
+#include <algorithm>
+using namespace std;
+
+int main(){
+    long long x, mx;
+${logic}
+    return 0;
+}`
+  },
+
+  min_pos_until0: {
+    objectives: "Găsești <b>cel mai mic pozitiv</b> dintr-o secvență (până la 0).",
+    theory: "Filtrezi: iei doar valori pozitive, alegi minimul dintre ele.",
+    checklist: `
+      <ul>
+        <li>Citești până la 0.</li>
+        <li>Ignori valorile ≤ 0.</li>
+        <li>Actualizezi minimul pozitiv.</li>
+        <li>Caz-limită: nu există pozitiv (conform enunțului real).</li>
+      </ul>
+    `,
+    example: `<code>Intrare: -2 7 4 0</code> → <code>Ieșire: 4</code>`,
+    blocks: [
+      { id:'init', text:'mn = LLONG_MAX; ok=false;' },
+      { id:'loop', text:'while (cin >> x && x != 0)' },
+      { id:'ifp', text:'if (x > 0) { mn = min(mn, x); ok=true; }' },
+      { id:'out', text:'if(ok) cout << mn; else cout << "NU EXISTA";' }
+    ],
+    correct: ['init','loop','ifp','out'],
+    template: (logic)=>`#include <iostream>
+#include <climits>
+#include <algorithm>
+using namespace std;
+
+int main(){
+    long long x, mn;
+    bool ok;
+${logic}
+    return 0;
+}`
+  },
+
+  n_maxim: {
+    objectives: "Determină <b>maximul dintre n valori</b> (input standard).",
+    theory: "Citești n, apoi parcurgi n numere actualizând maximul.",
+    checklist: `
+      <ul>
+        <li>Citești <code>n</code>.</li>
+        <li>Inițializezi maximul cu primul element.</li>
+        <li>Parcurgi restul și actualizezi.</li>
+      </ul>
+    `,
+    example: `<code>n=5: 1 9 3 9 2</code> → <code>9</code>`,
+    blocks: [
+      { id:'in', text:'cin >> n;' },
+      { id:'first', text:'cin >> x; mx = x;' },
+      { id:'for', text:'for (int i=2;i<=n;i++){ cin >> x; mx = max(mx,x); }' },
+      { id:'out', text:'cout << mx;' }
+    ],
+    correct: ['in','first','for','out'],
+    template: (logic)=>`#include <iostream>
+#include <algorithm>
+using namespace std;
+
+int main(){
+    int n; long long x, mx;
+${logic}
+    return 0;
+}`
+  },
+
+  sum_max_min: {
+    objectives: "Calculezi <b>min + max</b> dintr-un set de n valori.",
+    theory: "Menții simultan min și max curente.",
+    checklist: `
+      <ul>
+        <li>Citești n și primul element.</li>
+        <li>Inițializezi <code>mn=mx=primul</code>.</li>
+        <li>Actualizezi la fiecare pas.</li>
+        <li>Afișezi <code>mn + mx</code>.</li>
+      </ul>
+    `,
+    example: `<code>Intrare: 4 / 2 8 1 5</code> → <code>9</code>`,
+    blocks: [
+      { id:'in', text:'cin >> n;' },
+      { id:'first', text:'cin >> x; mn = mx = x;' },
+      { id:'for', text:'for(int i=2;i<=n;i++){ cin >> x; mn=min(mn,x); mx=max(mx,x); }' },
+      { id:'out', text:'cout << (mn + mx);' }
+    ],
+    correct: ['in','first','for','out'],
+    template: (logic)=>`#include <iostream>
+#include <algorithm>
+using namespace std;
+
+int main(){
+    int n; long long x, mn, mx;
+${logic}
+    return 0;
+}`
+  },
+
+  difMin_pair: {
+    objectives: "Identifici <b>diferența minimă</b> între două valori consecutive.",
+    theory: "La citirea secvenței, păstrezi elementul anterior și calculezi |curent-anterior|.",
+    checklist: `
+      <ul>
+        <li>Citești n și primele 2 valori.</li>
+        <li>Inițializezi răspunsul cu prima diferență.</li>
+        <li>Iterezi și menții minimul.</li>
+      </ul>
+    `,
+    example: `<code>Intrare: 5 / 10 13 12 20 21</code> → <code>1</code>`,
+    blocks: [
+      { id:'in', text:'cin >> n;' },
+      { id:'first2', text:'cin >> a >> b; best = llabs(b-a); prev = b;' },
+      { id:'for', text:'for(int i=3;i<=n;i++){ cin >> x; best = min(best, llabs(x - prev)); prev = x; }' },
+      { id:'out', text:'cout << best;' }
+    ],
+    correct: ['in','first2','for','out'],
+    template: (logic)=>`#include <iostream>
+#include <algorithm>
+#include <cstdlib>
+using namespace std;
+
+int main(){
+    int n; long long a,b,x,prev,best;
+${logic}
+    return 0;
+}`
+  },
+
+  generic: {
+    objectives: "Rezolvi pe baza enunțului PBInfo: alegi input/output, condiții și cazuri-limită.",
+    theory: "Folosește: <b>citește → decide → calculează → afișează</b>. Notează condițiile în comentarii.",
+    checklist: `
+      <ul>
+        <li>Copiezi cerința completă din PBInfo.</li>
+        <li>Identifici: date de intrare, date de ieșire, restricții.</li>
+        <li>Scrii 3–5 teste (normal + limită).</li>
+        <li>Implementezi și verifici.</li>
+      </ul>
+    `,
+    example: `<span class="termMuted">Exemplu depinde de enunțul complet.</span>`,
+    blocks: [],
+    correct: [],
+    template: ()=>`#include <bits/stdc++.h>
+using namespace std;
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    // TODO: Copiază enunțul PBInfo în comentarii
+    // 1) Citește datele
+    // 2) Aplică condițiile
+    // 3) Afișează rezultatul
+
+    return 0;
+}`
+  }
+};
+
+/* =========================================================
+   2) Problem registry (adaugă „cât mai multe” din listă)
+   - Pentru majoritatea: metadata + link PBInfo
+   - Pentru cele frecvente: pattern complet (blocuri + șablon)
+   ========================================================= */
+
+const PROBLEMS = [
+  /* --- Structura de decizie (ușoare: multe titluri din lista ta) --- */
+  { key:"p105", pb:105, name:"max2", cat:"decizie", diff:"easy", pattern:"max2",
+    desc:"Se citesc două numere întregi. Afișează maximul." },
+
+  { key:"p106", pb:106, name:"minim3", cat:"decizie", diff:"easy", pattern:"minim3",
+    desc:"Se citesc trei numere întregi. Afișează minimul." },
+
+  { key:"p109", pb:109, name:"Paritate", cat:"decizie", diff:"easy", pattern:"paritate",
+    desc:"Se citește un număr. Stabilește dacă este par sau impar." },
+
+  { key:"p7", pb:7, name:"maxim", cat:"decizie", diff:"easy", pattern:"generic", desc:"Problemă de decizie (enunț în PBInfo)." },
+  { key:"p28", pb:28, name:"maxim2", cat:"decizie", diff:"easy", pattern:"generic", desc:"Problemă de decizie (enunț în PBInfo)." },
+  { key:"p39", pb:39, name:"maxmin", cat:"decizie", diff:"easy", pattern:"generic", desc:"Problemă de decizie (enunț în PBInfo)." },
+  { key:"p167", pb:167, name:"Semn", cat:"decizie", diff:"easy", pattern:"generic", desc:"Determină semnul (pozitiv/negativ/0)." },
+  { key:"p168", pb:168, name:"Semn1", cat:"decizie", diff:"easy", pattern:"generic", desc:"Variantă pe semn (enunț PBInfo)." },
+  { key:"p177", pb:177, name:"bisect", cat:"decizie", diff:"easy", pattern:"generic", desc:"Decizie cu bisectoare / condiții (enunț PBInfo)." },
+  { key:"p178", pb:178, name:"patratPerfect", cat:"decizie", diff:"easy", pattern:"generic", desc:"Verificare pătrat perfect (enunț PBInfo)." },
+  { key:"p179", pb:179, name:"triunghi", cat:"decizie", diff:"easy", pattern:"generic", desc:"Condiții triunghi (enunț PBInfo)." },
+  { key:"p334", pb:334, name:"Dreapta", cat:"decizie", diff:"easy", pattern:"generic", desc:"Condiții despre dreaptă (enunț PBInfo)." },
+  { key:"p446", pb:446, name:"cifmax3", cat:"decizie", diff:"easy", pattern:"generic", desc:"Cifre + decizii (enunț PBInfo)." },
+  { key:"p449", pb:449, name:"nrcif", cat:"decizie", diff:"easy", pattern:"generic", desc:"Număr de cifre / condiții (enunț PBInfo)." },
+  { key:"p450", pb:450, name:"minicalc", cat:"decizie", diff:"easy", pattern:"generic", desc:"Calculator simplu (enunț PBInfo)." },
+  { key:"p451", pb:451, name:"calcul", cat:"decizie", diff:"easy", pattern:"generic", desc:"Calcul cu condiții (enunț PBInfo)." },
+  { key:"p452", pb:452, name:"cifimp", cat:"decizie", diff:"easy", pattern:"generic", desc:"Cifre impare / decizie (enunț PBInfo)." },
+  { key:"p453", pb:453, name:"distincte1", cat:"decizie", diff:"easy", pattern:"generic", desc:"Verificare distincte (enunț PBInfo)." },
+  { key:"p469", pb:469, name:"Interval", cat:"decizie", diff:"easy", pattern:"generic", desc:"Verificare apartenență interval (enunț PBInfo)." },
+  { key:"p816", pb:816, name:"Sticle", cat:"decizie", diff:"easy", pattern:"generic", desc:"Modelare resurse (enunț PBInfo)." },
+  { key:"p832", pb:832, name:"Nota", cat:"decizie", diff:"easy", pattern:"generic", desc:"Promovat / corigent (enunț PBInfo)." },
+  { key:"p833", pb:833, name:"Varste copii", cat:"decizie", diff:"easy", pattern:"generic", desc:"Condiții pe vârste (enunț PBInfo)." },
+  { key:"p1301", pb:1301, name:"isoscel", cat:"decizie", diff:"easy", pattern:"generic", desc:"Triunghi isoscel (enunț PBInfo)." },
+  { key:"p1311", pb:1311, name:"CifEgale", cat:"decizie", diff:"easy", pattern:"generic", desc:"Cifre egale (enunț PBInfo)." },
+  { key:"p1358", pb:1358, name:"Minciuna", cat:"decizie", diff:"easy", pattern:"generic", desc:"Condiții logice (enunț PBInfo)." },
+  { key:"p2419", pb:2419, name:"Intalnire", cat:"decizie", diff:"easy", pattern:"generic", desc:"Modelare întâlnire (enunț PBInfo)." },
+  { key:"p2696", pb:2696, name:"CifP_CifI", cat:"decizie", diff:"easy", pattern:"generic", desc:"Cifre pare/impare (enunț PBInfo)." },
+  { key:"p2765", pb:2765, name:"CheckColor", cat:"decizie", diff:"easy", pattern:"generic", desc:"Decizie pe culori (enunț PBInfo)." },
+  { key:"p3060", pb:3060, name:"melc", cat:"decizie", diff:"easy", pattern:"generic", desc:"Modelare melc (enunț PBInfo)." },
+  { key:"p3063", pb:3063, name:"luna", cat:"decizie", diff:"easy", pattern:"generic", desc:"Decizie calendar (enunț PBInfo)." },
+  { key:"p3185", pb:3185, name:"Concurs1", cat:"decizie", diff:"easy", pattern:"generic", desc:"Eligibilitate concurs (enunț PBInfo)." },
+  { key:"p3211", pb:3211, name:"Cumparaturi1", cat:"decizie", diff:"easy", pattern:"generic", desc:"Modelare cumpărături (enunț PBInfo)." },
+  { key:"p3212", pb:3212, name:"Cumparaturi2", cat:"decizie", diff:"easy", pattern:"generic", desc:"Modelare cumpărături (enunț PBInfo)." },
+  { key:"p4339", pb:4339, name:"pare_impare", cat:"decizie", diff:"easy", pattern:"generic", desc:"Decizii pare/impare (enunț PBInfo)." },
+  { key:"p4360", pb:4360, name:"Trixie1", cat:"decizie", diff:"easy", pattern:"generic", desc:"Anagramă cifre (enunț PBInfo)." },
+  { key:"p4898", pb:4898, name:"Stâna", cat:"decizie", diff:"easy", pattern:"generic", desc:"Modelare (enunț PBInfo)." },
+
+  /* --- Structura de decizie (medii/dificile/concurs din lista ta) --- */
+  { key:"p172_dec", pb:172, name:"difMin", cat:"decizie", diff:"medium", pattern:"generic", desc:"Diferență minimă (conform enunțului PBInfo)." },
+  { key:"p333", pb:333, name:"triunghi1", cat:"decizie", diff:"medium", pattern:"generic", desc:"Variantă de triunghi (enunț PBInfo)." },
+  { key:"p480", pb:480, name:"Sum 3 Cons", cat:"decizie", diff:"medium", pattern:"generic", desc:"Sumă pe 3 consecutive (enunț PBInfo)." },
+  { key:"p4899", pb:4899, name:"minn3", cat:"decizie", diff:"medium", pattern:"generic", desc:"Minime (enunț PBInfo)." },
+  { key:"p1002", pb:1002, name:"Paginare", cat:"decizie", diff:"hard", pattern:"generic", desc:"Dificilă (enunț PBInfo)." },
+  { key:"p3806", pb:3806, name:"Mediane", cat:"decizie", diff:"hard", pattern:"generic", desc:"Dificilă (enunț PBInfo)." },
+  { key:"p1470", pb:1470, name:"Parcare", cat:"decizie", diff:"contest", pattern:"generic", desc:"Concurs (enunț PBInfo)." },
+  { key:"p3734", pb:3734, name:"Formula1", cat:"decizie", diff:"contest", pattern:"generic", desc:"Concurs (enunț PBInfo)." },
+  { key:"p4940", pb:4940, name:"k2", cat:"decizie", diff:"contest", pattern:"generic", desc:"Concurs (enunț PBInfo)." },
+
+  /* --- Maxime și minime (din lista ta) --- */
+  { key:"p54", pb:54, name:"Maxim", cat:"maxmin", diff:"easy", pattern:"max_in_seq_until0",
+    desc:"Se citesc numere până la 0. Afișează maximul." },
+
+  { key:"p55", pb:55, name:"MinimPozitive", cat:"maxmin", diff:"easy", pattern:"min_pos_until0",
+    desc:"Se citesc numere până la 0. Afișează cel mai mic pozitiv." },
+
+  { key:"p354", pb:354, name:"n_maxim", cat:"maxmin", diff:"easy", pattern:"n_maxim",
+    desc:"Se citesc n numere. Determină valoarea maximă." },
+
+  { key:"p355", pb:355, name:"n_minim", cat:"maxmin", diff:"easy", pattern:"generic",
+    desc:"Se citesc n numere. Determină valoarea minimă (enunț PBInfo)." },
+
+  { key:"p347", pb:347, name:"SumMaxMin", cat:"maxmin", diff:"easy", pattern:"sum_max_min",
+    desc:"Se citesc n numere. Afișează suma (min + max)." },
+
+  { key:"p172_max", pb:172, name:"difMin", cat:"maxmin", diff:"medium", pattern:"difMin_pair",
+    desc:"Se citește o secvență. Diferența minimă între consecutive (conform PBInfo)." },
+
+  { key:"p1192", pb:1192, name:"maxim", cat:"maxmin", diff:"medium", pattern:"generic",
+    desc:"Două cele mai mari (enunț PBInfo)." },
+
+  { key:"p281", pb:281, name:"Maxim5", cat:"maxmin", diff:"hard", pattern:"generic",
+    desc:"Fișier multi-linie: selecție maxim pe linia cu cele mai puține numere (enunț PBInfo)." },
+
+  { key:"p953", pb:953, name:"deedee", cat:"maxmin", diff:"contest", pattern:"generic",
+    desc:"Concurs (enunț PBInfo)." },
+
+  /* --- Sume, produse, numărări (din lista ta) --- */
+  { key:"p46", pb:46, name:"SumaPare", cat:"sumprod", diff:"easy", pattern:"sumapare",
+    desc:"Suma primelor n numere pare naturale." },
+
+  { key:"p49", pb:49, name:"Factorial", cat:"sumprod", diff:"easy", pattern:"factorial",
+    desc:"Calculează n!." },
+
+  { key:"p57", pb:57, name:"n_Suma", cat:"sumprod", diff:"easy", pattern:"generic",
+    desc:"Sumă de n valori (enunț PBInfo)." },
+
+  { key:"p1360", pb:1360, name:"Suma Gauss", cat:"sumprod", diff:"easy", pattern:"generic",
+    desc:"Sumă 1..n (enunț PBInfo)." },
+
+  { key:"p4278", pb:4278, name:"SumCnt1", cat:"sumprod", diff:"easy", pattern:"generic",
+    desc:"Sumă + numărare (enunț PBInfo)." },
+
+  { key:"p4545", pb:4545, name:"Suma Cuburi", cat:"sumprod", diff:"easy", pattern:"generic",
+    desc:"Suma primelor n cuburi (enunț PBInfo)." },
+
+  { key:"p4091", pb:4091, name:"sss1", cat:"sumprod", diff:"contest", pattern:"generic",
+    desc:"Concurs (enunț PBInfo)." },
+
+  { key:"p4245", pb:4245, name:"suma ONI", cat:"sumprod", diff:"contest", pattern:"generic",
+    desc:"Concurs: semne ± pentru a atinge o sumă (enunț PBInfo)." },
+
+  /* --- Structuri repetitive (din lista ta: le includem ca „practice”, template generic) --- */
+  { key:"p327", pb:327, name:"AfisareNumere", cat:"loop", diff:"easy", pattern:"generic", desc:"Afișări cu bucle (enunț PBInfo)." },
+  { key:"p330", pb:330, name:"AfisareNumerePare", cat:"loop", diff:"easy", pattern:"generic", desc:"Afișează pare (enunț PBInfo)." },
+  { key:"p331", pb:331, name:"AfisareNumereImpare", cat:"loop", diff:"easy", pattern:"generic", desc:"Afișează impare (enunț PBInfo)." },
+  { key:"p3983", pb:3983, name:"afisare_M1", cat:"loop", diff:"easy", pattern:"generic", desc:"Multipli (enunț PBInfo)." },
+  { key:"p4917", pb:4917, name:"progresie9", cat:"loop", diff:"easy", pattern:"generic", desc:"Progresie (enunț PBInfo)." },
+  { key:"p2102", pb:2102, name:"Robot3", cat:"loop", diff:"contest", pattern:"generic", desc:"Concurs: simulare robot (enunț PBInfo)." }
+];
+
+/* =========================================================
+   3) UI state + rendering
+   ========================================================= */
+
+let editor;
+let currentKey = null;
+
+function catChip(cat){
+  return `${CAT_LABEL[cat] ?? cat}`;
+}
+function diffChip(diff){
+  return `${DIFF_LABEL[diff] ?? diff}`;
+}
+function diffDotClass(diff){
+  if(diff==="easy") return "easy";
+  if(diff==="medium") return "medium";
+  if(diff==="hard") return "hard";
+  return "contest";
+}
+
+function loadProgress(){
+  try{ return JSON.parse(localStorage.getItem("edulab_progress")||"{}"); }
+  catch(e){ return {}; }
+}
+function saveProgress(p){
+  localStorage.setItem("edulab_progress", JSON.stringify(p));
+}
+function setStatus(key, status){
+  const prog = loadProgress();
+  prog[key] = status;
+  saveProgress(prog);
+}
+function getStatus(key){
+  const prog = loadProgress();
+  return prog[key] || "Neînceput";
+}
+function clearProgress(){
+  localStorage.removeItem("edulab_progress");
+  renderList();
+  if(currentKey) loadProblem(currentKey);
+}
+
+function resetFilters(){
+  document.getElementById("q").value="";
+  document.getElementById("filterCat").value="all";
+  document.getElementById("filterDiff").value="all";
+  renderList();
+}
+
+function toggleTeacherNotes(){
+  const el = document.getElementById("teacherNotes");
+  el.style.display = (el.style.display==="none") ? "block" : "none";
+}
+
+function matchesFilter(p){
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const fc = document.getElementById("filterCat").value;
+  const fd = document.getElementById("filterDiff").value;
+
+  if(fc!=="all" && p.cat!==fc) return false;
+  if(fd!=="all" && p.diff!==fd) return false;
+
+  if(!q) return true;
+  const hay = (`#${p.pb} ${p.name} ${CAT_LABEL[p.cat]||p.cat} ${DIFF_LABEL[p.diff]||p.diff}`).toLowerCase();
+  return hay.includes(q);
+}
+
+function renderList(){
+  const list = document.getElementById("plist");
+  list.innerHTML = "";
+
+  const filtered = PROBLEMS.filter(matchesFilter);
+  document.getElementById("countLabel").textContent = `${filtered.length} rezultate`;
+
+  filtered.forEach(p=>{
+    const status = getStatus(p.key);
+    const item = document.createElement("div");
+    item.className = "pitem" + (p.key===currentKey ? " active" : "");
+    item.onclick = ()=>loadProblem(p.key);
+
+    const left = document.createElement("div");
+    left.className = "pmeta";
+    left.innerHTML = `
+      <div class="nm">#${p.pb} • ${p.name}</div>
+      <div class="sub">${CAT_LABEL[p.cat] || p.cat} • ${status}</div>
+    `;
+
+    const right = document.createElement("div");
+    right.className = "rightMeta";
+    right.innerHTML = `
+      <span class="badge ${p.diff}">${DIFF_LABEL[p.diff] || p.diff}</span>
+      <span class="tiny">${p.pattern !== "generic" ? "blocuri" : "editor"}</span>
+    `;
+
+    item.appendChild(left);
+    item.appendChild(right);
+    list.appendChild(item);
+  });
+}
+
+/* =========================================================
+   4) Problem load → lesson material + blocks + editor
+   ========================================================= */
+
+function openPbinfo(){
+  if(!currentKey) return;
+  const p = PROBLEMS.find(x=>x.key===currentKey);
+  window.open(pbUrl(p.pb), "_blank", "noopener");
+}
+
+function loadProblem(key){
+  currentKey = key;
+  renderList();
+
+  const p = PROBLEMS.find(x=>x.key===key);
+  const pattern = PATTERNS[p.pattern] || PATTERNS.generic;
+
+  // header / chips
+  document.getElementById("pTitle").textContent = `#${p.pb} • ${p.name}`;
+  document.getElementById("pIdLabel").textContent = `#${p.pb}`;
+  document.getElementById("pStatus").textContent = getStatus(p.key);
+
+  // category chip
+  const catEl = document.getElementById("pChipCat");
+  catEl.innerHTML = `<span class="dot" style="background:rgba(96,165,250,0.85)"></span><span>${catChip(p.cat)}</span>`;
+
+  // diff chip
+  const diffEl = document.getElementById("pChipDiff");
+  diffEl.innerHTML = `<span class="dot ${diffDotClass(p.diff)}"></span><span>${diffChip(p.diff)}</span>`;
+
+  // desc + link
+  document.getElementById("pDesc").innerHTML = (p.desc || "Vezi enunțul complet în PBInfo.");
+  const a = document.getElementById("pbLink");
+  a.href = pbUrl(p.pb);
+  a.textContent = `pbinfo.ro/probleme/${p.pb}`;
+
+  // objectives/theory/checklist/example
+  document.getElementById("pObj").innerHTML = pattern.objectives || PATTERNS.generic.objectives;
+  document.getElementById("pTheory").innerHTML = pattern.theory || PATTERNS.generic.theory;
+  document.getElementById("pChecklist").innerHTML = pattern.checklist || PATTERNS.generic.checklist;
+  document.getElementById("pExample").innerHTML = pattern.example || PATTERNS.generic.example;
+
+  // blocks
+  const dropZone = document.getElementById("dropZone");
+  const src = document.getElementById("srcBlocks");
+  dropZone.innerHTML = "";
+  src.innerHTML = "";
+
+  const hasBlocks = (pattern.blocks && pattern.blocks.length>0);
+
+  if(!hasBlocks){
+    dropZone.innerHTML = `<div class="termMuted">Blocurile nu sunt definite pentru această problemă. Lucrează direct în editor (dreapta).</div>`;
+  } else {
+    pattern.blocks.forEach(b=>{
+      const el = document.createElement("div");
+      el.className = "block";
+      el.draggable = true;
+      el.id = b.id;
+      el.textContent = b.text;
+      el.ondragstart = drag;
+      src.appendChild(el);
+    });
+  }
+
+  // editor
+  const code = hasBlocks
+    ? pattern.template("\n    // Reconstruiește algoritmul cu blocuri în stânga...\n")
+    : pattern.template();
+
+  editor.setValue(code);
+
+  // terminal note
+  const term = document.getElementById("terminal");
+  term.innerHTML = `
+    <div class="termMuted">// Problemă încărcată: #${p.pb} • ${p.name}</div>
+    <div class="termMuted">// Mod: ${hasBlocks ? "blocuri + verificare ordine" : "editor liber (fără verificare blocuri)"}.</div>
+  `;
+}
+
+/* =========================================================
+   5) Drag/drop + code update
+   ========================================================= */
+
+function allowDrop(ev){ ev.preventDefault(); }
+function drag(ev){ ev.dataTransfer.setData("text", ev.target.id); }
+
+function drop(ev){
+  ev.preventDefault();
+  const id = ev.dataTransfer.getData("text");
+  const p = PROBLEMS.find(x=>x.key===currentKey);
+  const pattern = PATTERNS[p.pattern] || PATTERNS.generic;
+  if(!pattern.blocks || pattern.blocks.length===0) return;
+
+  const el = document.getElementById(id);
+  if(!el) return;
+
+  document.getElementById("dropZone").appendChild(el);
+  updateCodeFromBlocks();
+}
+
+function updateCodeFromBlocks(){
+  const p = PROBLEMS.find(x=>x.key===currentKey);
+  const pattern = PATTERNS[p.pattern] || PATTERNS.generic;
+  if(!pattern.blocks || pattern.blocks.length===0) return;
+
+  const dropZone = document.getElementById("dropZone");
+  const blocks = Array.from(dropZone.children).filter(x=>x.classList && x.classList.contains("block"));
+
+  let logic = "";
+  blocks.forEach(b=>{
+    const bd = pattern.blocks.find(x=>x.id===b.id);
+    if(!bd) return;
+    // Indent heuristic
+    let indent = "    ";
+    if (b.id.startsWith("out") || b.id.includes("upd") || b.id.includes("ifp")) indent = "        ";
+    logic += `${indent}${bd.text}\n`;
+  });
+
+  editor.setValue(pattern.template(logic));
+}
+
+/* =========================================================
+   6) Simulation (verificare ordine blocuri + progres)
+   ========================================================= */
+
+function runSimulation(){
+  if(!currentKey) return;
+
+  const p = PROBLEMS.find(x=>x.key===currentKey);
+  const pattern = PATTERNS[p.pattern] || PATTERNS.generic;
+  const term = document.getElementById("terminal");
+
+  term.innerHTML = `<div class="info">[Sistem] Verificare în curs…</div>`;
+
+  setTimeout(()=>{
+    // If no blocks: mark as "În lucru" and give guidance
+    if(!pattern.blocks || pattern.blocks.length===0){
+      setStatus(p.key, "În lucru");
+      document.getElementById("pStatus").textContent = getStatus(p.key);
+      renderList();
+
+      term.innerHTML += `
+        <div class="warn">[INFO] Această problemă nu are verificare pe blocuri.</div>
+        <div class="termMuted">Sugestie:</div>
+        <div class="termMuted">• Copiază enunțul complet din PBInfo</div>
+        <div class="termMuted">• Scrie 3 teste (normal + limită)</div>
+        <div class="termMuted">• Rulează local / într-un judge ulterior</div>
+      `;
+      return;
+    }
+
+    const userOrder = Array.from(document.getElementById("dropZone").children)
+      .filter(x=>x.classList && x.classList.contains("block"))
+      .map(x=>x.id);
+
+    const correct = pattern.correct || [];
+
+    if(JSON.stringify(userOrder) === JSON.stringify(correct)){
+      setStatus(p.key, "Rezolvat (blocuri OK)");
+      document.getElementById("pStatus").textContent = getStatus(p.key);
+      renderList();
+
+      term.innerHTML += `
+        <div class="ok">[OK] Ordine blocuri corectă.</div>
+        <div class="ok">[OK] Pattern valid: ${p.pattern}</div>
+        <div class="termMuted">Următorul pas: adaptează exact I/O după enunț (dacă diferă: texte, formatare, etc.).</div>
+      `;
+    } else {
+      setStatus(p.key, "În lucru");
+      document.getElementById("pStatus").textContent = getStatus(p.key);
+      renderList();
+
+      term.innerHTML += `
+        <div class="err">[EROARE] Ordine incorectă a blocurilor.</div>
+        <div class="termMuted">Sugestii rapide:</div>
+        <div class="termMuted">• Citește datele înainte de prelucrare</div>
+        <div class="termMuted">• <code>if</code> trebuie urmat de instrucțiunea din ramura sa</div>
+        <div class="termMuted">• Verifică indentarea logică (ramuri)</div>
+        <div class="termMuted">Ordinea ta: ${userOrder.join(" → ") || "(gol)"}</div>
+      `;
+    }
+  }, 650);
+}
+
+/* =========================================================
+   7) Monaco init + events
+   ========================================================= */
+
+require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+
+require(['vs/editor/editor.main'], function(){
+  editor = monaco.editor.create(document.getElementById('monaco'), {
+    value: "// Se încarcă…",
+    language: 'cpp',
+    theme: 'vs-dark',
+    automaticLayout: true,
+    fontSize: 14,
+    minimap: { enabled: false }
+  });
+
+  // reactive filters
+  document.getElementById("q").addEventListener("input", renderList);
+  document.getElementById("filterCat").addEventListener("change", renderList);
+  document.getElementById("filterDiff").addEventListener("change", renderList);
+
+  renderList();
+  // default: max2
+  loadProblem("p105");
+});
+</script>
+</body>
+</html>

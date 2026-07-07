@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>pbinfo.paradis-college.ro — Algorithm Workstation (Mock)</title>
+
+  <!-- Optional: Monaco (will load if online). If you want purely offline, remove these 2 lines. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#0f1a2e;
+      --panel2:#0c1629;
+      --border:rgba(148,163,184,.14);
+      --text:#e5e7eb;
+      --muted:#9aa4b2;
+
+      --accent:#3b82f6;
+      --good:#22c55e;
+      --bad:#ef4444;
+      --warn:#f59e0b;
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+
+      --r:10px;
+      --shadow: 0 18px 50px rgba(0,0,0,.45);
+      --shadow2: 0 10px 25px rgba(0,0,0,.35);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 30% 0%, rgba(59,130,246,.14), transparent 55%),
+        radial-gradient(900px 500px at 80% 10%, rgba(34,197,94,.10), transparent 60%),
+        radial-gradient(800px 500px at 50% 100%, rgba(245,158,11,.08), transparent 60%),
+        var(--bg);
+      overflow:hidden;
+    }
+
+    /* Top bar */
+    .topbar{
+      height:52px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:0 12px;
+      border-bottom:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+      user-select:none;
+    }
+    .hamburger{
+      width:36px;height:36px;border-radius:8px;
+      display:grid;place-items:center;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.03);
+      cursor:pointer;
+    }
+    .hamburger:hover{border-color:rgba(59,130,246,.35)}
+    .title{
+      display:flex;align-items:center;gap:10px;
+      min-width:340px;
+    }
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:7px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.03);
+      font-size:12px;color:var(--muted);
+    }
+    .pill b{color:var(--text); font-weight:600}
+    .spacer{flex:1}
+    .btn{
+      height:34px;
+      padding:0 12px;
+      border-radius:8px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+      cursor:pointer;
+      font-size:13px;
+      display:inline-flex;align-items:center;gap:8px;
+    }
+    .btn:hover{border-color:rgba(59,130,246,.35)}
+    .btn.primary{
+      border-color:rgba(59,130,246,.55);
+      background:rgba(59,130,246,.18);
+    }
+    .btn.danger{
+      border-color:rgba(239,68,68,.45);
+      background:rgba(239,68,68,.12);
+    }
+    .kbd{
+      font-family:var(--mono);
+      font-size:11px;
+      padding:2px 6px;
+      border-radius:6px;
+      border:1px solid var(--border);
+      color:var(--muted);
+      background:rgba(255,255,255,.02);
+    }
+    .timer{
+      font-family:var(--mono);
+      padding:7px 10px;border-radius:8px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+    }
+
+    /* App grid */
+    .app{
+      height:calc(100% - 52px);
+      display:grid;
+      grid-template-columns: 280px 1fr 380px;
+      grid-template-rows: 1fr 220px;
+      grid-template-areas:
+        "explorer stage studio"
+        "explorer bottom studio";
+      gap:10px;
+      padding:10px;
+    }
+
+    .panel{
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.015));
+      box-shadow:var(--shadow2);
+      overflow:hidden;
+      position:relative;
+    }
+    .panel-header{
+      height:42px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 10px;
+      border-bottom:1px solid var(--border);
+      background:rgba(255,255,255,.02);
+    }
+    .panel-header .hleft{
+      display:flex;align-items:center;gap:10px;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .panel-header .hleft b{color:var(--text); font-weight:600}
+    .panel-header .hright{display:flex;align-items:center;gap:8px}
+    .iconbtn{
+      width:30px;height:30px;border-radius:8px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.02);
+      cursor:pointer;
+      display:grid;place-items:center;
+      color:var(--muted);
+    }
+    .iconbtn:hover{border-color:rgba(59,130,246,.35); color:var(--text)}
+
+    /* Explorer */
+    .explorer{grid-area:explorer}
+    .tree{
+      padding:10px;
+      font-family:var(--mono);
+      font-size:12px;
+      color:var(--muted);
+      height:calc(100% - 42px);
+      overflow:auto;
+    }
+    .tree .section{margin-bottom:10px}
+    .node{
+      display:flex;align-items:center;gap:8px;
+      padding:6px 8px;
+      border-radius:8px;
+      cursor:pointer;
+    }
+    .node:hover{background:rgba(255,255,255,.03); color:var(--text)}
+    .node.active{
+      background:rgba(59,130,246,.14);
+      color:var(--text);
+      border:1px solid rgba(59,130,246,.25);
+    }
+    .indent{padding-left:16px}
+    .dot{width:6px;height:6px;border-radius:50%; background:rgba(148,163,184,.45)}
+    .folder{color:#cbd5e1}
+    .file{color:#94a3b8}
+
+    /* Stage */
+    .stage{grid-area:stage}
+    .tabs{
+      display:flex;align-items:center;gap:6px;
+      padding:8px;
+      border-bottom:1px solid var(--border);
+      background:rgba(0,0,0,.12);
+    }
+    .tab{
+      padding:8px 10px;
+      border-radius:8px;
+      border:1px solid transparent;
+      color:var(--muted);
+      cursor:pointer;
+      font-size:13px;
+    }
+    .tab:hover{color:var(--text)}
+    .tab.active{
+      border-color:rgba(59,130,246,.35);
+      background:rgba(59,130,246,.12);
+      color:var(--text);
+    }
+    .stage-body{
+      height:calc(100% - 42px - 42px);
+      display:none;
+    }
+    .stage-body.active{display:block}
+    .canvasWrap{
+      height:100%;
+      padding:10px;
+      display:grid;
+      grid-template-rows: 1fr auto;
+      gap:10px;
+    }
+    .canvasCard{
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:
+        radial-gradient(circle at 30% 10%, rgba(59,130,246,.12), transparent 35%),
+        radial-gradient(circle at 75% 30%, rgba(34,197,94,.09), transparent 40%),
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.14));
+      position:relative;
+      overflow:hidden;
+    }
+    /* subtle grid */
+    .canvasCard::before{
+      content:"";
+      position:absolute;inset:0;
+      background-image:
+        linear-gradient(to right, rgba(148,163,184,.10) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148,163,184,.10) 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity:.35;
+      pointer-events:none;
+    }
+    .canvasHUD{
+      position:absolute;left:12px;right:12px;top:12px;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:10px;
+      z-index:2;
+    }
+    .hudLeft,.hudRight{display:flex;align-items:center;gap:8px}
+    .badge{
+      font-family:var(--mono);
+      font-size:11px;
+      padding:6px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(0,0,0,.18);
+      color:#cbd5e1;
+    }
+    .badge.good{border-color:rgba(34,197,94,.35); color:#bbf7d0}
+    .badge.warn{border-color:rgba(245,158,11,.35); color:#fde68a}
+    .badge.bad{border-color:rgba(239,68,68,.35); color:#fecaca}
+
+    .simArea{
+      position:absolute; inset:0;
+      display:grid;
+      place-items:center;
+      z-index:1;
+      padding:58px 14px 14px 14px;
+    }
+
+    /* Compiler robot (SVG container) */
+    .robot{
+      width:min(860px, 100%);
+      max-height:100%;
+      filter: drop-shadow(0 18px 40px rgba(0,0,0,.55));
+    }
+
+    .simControls{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:rgba(0,0,0,.18);
+      font-family:var(--mono);
+      font-size:12px;
+      color:var(--muted);
+    }
+    .simControls .group{display:flex;align-items:center;gap:8px}
+    .toggle{
+      display:flex;align-items:center;gap:8px;
+      padding:6px 8px;border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.02);
+    }
+    input[type="range"]{width:160px}
+
+    /* Theory & Quiz */
+    .scroll{
+      height:calc(100% - 42px - 42px);
+      overflow:auto;
+      padding:14px;
+    }
+    .card{
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:rgba(0,0,0,.14);
+      padding:12px;
+      margin-bottom:12px;
+    }
+    .card h3{margin:0 0 6px 0; font-size:14px}
+    .card ul{margin:8px 0 0 18px; color:var(--muted)}
+    .q{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      background:rgba(0,0,0,.14);
+      margin-bottom:12px;
+    }
+    .q .answers{display:grid;gap:8px;margin-top:10px}
+    .ans{
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px;
+      background:rgba(255,255,255,.02);
+      cursor:pointer;
+      color:var(--muted);
+    }
+    .ans:hover{border-color:rgba(59,130,246,.35); color:var(--text)}
+    .ans.correct{border-color:rgba(34,197,94,.45); background:rgba(34,197,94,.10); color:var(--text)}
+    .ans.wrong{border-color:rgba(239,68,68,.45); background:rgba(239,68,68,.08); color:var(--text)}
+    .explain{margin-top:10px; color:var(--muted); font-size:13px; display:none}
+    .explain.show{display:block}
+
+    /* Studio (right) */
+    .studio{grid-area:studio; display:grid; grid-template-rows: 1fr 1fr; gap:10px}
+    .builder, .editor{min-height:0}
+    .builder-body{
+      height:calc(100% - 42px);
+      display:grid;
+      grid-template-columns: 140px 1fr;
+      gap:10px;
+      padding:10px;
+    }
+    .palette, .workspace{
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:rgba(0,0,0,.14);
+      overflow:auto;
+    }
+    .palette{padding:10px}
+    .workspace{padding:10px}
+    .block{
+      user-select:none;
+      font-family:var(--mono);
+      font-size:12px;
+      padding:10px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.03);
+      margin-bottom:8px;
+      cursor:grab;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      color:#cbd5e1;
+    }
+    .block small{color:var(--muted)}
+    .block.control{border-color:rgba(59,130,246,.35); background:rgba(59,130,246,.10)}
+    .block.io{border-color:rgba(245,158,11,.35); background:rgba(245,158,11,.08)}
+    .block.data{border-color:rgba(168,85,247,.35); background:rgba(168,85,247,.08)}
+    .block.func{border-color:rgba(34,197,94,.35); background:rgba(34,197,94,.08)}
+    .workspace .block{cursor:grab}
+    .ghost{
+      border:1px dashed rgba(148,163,184,.35);
+      background:transparent;
+      color:transparent;
+    }
+
+    /* Editor */
+    .editor-body{
+      height:calc(100% - 42px);
+      display:grid;
+      grid-template-rows: 34px 1fr;
+      padding:10px;
+      gap:10px;
+    }
+    .modebar{
+      display:flex;align-items:center;gap:6px;
+    }
+    .mode{
+      font-family:var(--mono);
+      font-size:12px;
+      padding:7px 10px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.02);
+      color:var(--muted);
+      cursor:pointer;
+    }
+    .mode.active{
+      border-color:rgba(59,130,246,.35);
+      background:rgba(59,130,246,.12);
+      color:var(--text);
+    }
+    .codeWrap{
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:hidden;
+      background:rgba(0,0,0,.18);
+      position:relative;
+      min-height:0;
+    }
+    #editor{
+      height:100%;
+      width:100%;
+    }
+    .fallback{
+      height:100%;
+      width:100%;
+      border:0;
+      outline:0;
+      resize:none;
+      padding:12px;
+      font-family:var(--mono);
+      font-size:12px;
+      background:transparent;
+      color:#dbeafe;
+      line-height:1.5;
+    }
+
+    /* Bottom panel */
+    .bottom{grid-area:bottom}
+    .bottom-tabs{
+      display:flex;align-items:center;gap:6px;
+      padding:8px;
+      border-bottom:1px solid var(--border);
+      background:rgba(0,0,0,.12);
+    }
+    .bottom-body{
+      height:calc(100% - 42px - 42px);
+      overflow:auto;
+      padding:12px;
+      font-family:var(--mono);
+      font-size:12px;
+      color:var(--muted);
+    }
+    .logline{padding:6px 0; border-bottom:1px dashed rgba(148,163,184,.12)}
+    .status{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 8px;border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(0,0,0,.18);
+      margin-right:8px;
+    }
+    .status.good{border-color:rgba(34,197,94,.35); color:#bbf7d0}
+    .status.bad{border-color:rgba(239,68,68,.35); color:#fecaca}
+    .status.run{border-color:rgba(59,130,246,.35); color:#bfdbfe}
+
+    /* Resizers (simple) */
+    .v-resize, .h-resize{
+      position:absolute; z-index:20;
+      background:transparent;
+    }
+    .v-resize{
+      top:10px; bottom:10px; width:8px; cursor:col-resize;
+    }
+    .h-resize{
+      left:10px; right:10px; height:8px; cursor:row-resize;
+    }
+    .grabline{
+      position:absolute; inset:0;
+      display:grid; place-items:center;
+      pointer-events:none;
+      opacity:0;
+      transition:.15s;
+    }
+    .grabline::after{
+      content:"";
+      width:2px;height:54px;border-radius:999px;
+      background:rgba(148,163,184,.28);
+      box-shadow:0 0 0 1px rgba(0,0,0,.25);
+    }
+    .v-resize:hover .grabline, .h-resize:hover .grabline{opacity:1}
+
+    /* Responsive */
+    @media (max-width: 1100px){
+      .app{
+        grid-template-columns: 260px 1fr;
+        grid-template-rows: 1fr 260px 420px;
+        grid-template-areas:
+          "explorer stage"
+          "explorer bottom"
+          "studio studio";
+      }
+      .studio{grid-template-rows: 320px 1fr}
+    }
+    @media (max-width: 760px){
+      body{overflow:auto}
+      .app{
+        height:auto;
+        grid-template-columns: 1fr;
+        grid-template-rows: 320px 520px 340px 520px;
+        grid-template-areas:
+          "explorer"
+          "stage"
+          "bottom"
+          "studio";
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="hamburger" id="toggleExplorer" title="Toggle Explorer (Ctrl+B)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <div class="title">
+      <div class="pill"><b>Lesson:</b> Fibonacci Sequence</div>
+      <div class="pill"><b>Topic:</b> Recursivitate</div>
+      <div class="pill"><b>Problem:</b> fibonacci.pb</div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <button class="btn" id="freezeBtn" title="Freeze screen">
+      <span>Freeze</span>
+    </button>
+    <button class="btn" id="revealBtn" title="Reveal step">
+      <span>Reveal</span>
+    </button>
+    <div class="timer" id="timer">Timer 01:00</div>
+    <button class="btn primary" id="runBtn" title="Run (Ctrl+Enter)">
+      <span>Run ▶</span>
+      <span class="kbd">Ctrl+Enter</span>
+    </button>
+  </div>
+
+  <div class="app" id="app">
+    <!-- Explorer -->
+    <div class="panel explorer" id="explorerPanel">
+      <div class="panel-header">
+        <div class="hleft"><b>Problems</b> <span>Explorer</span></div>
+        <div class="hright">
+          <button class="iconbtn" id="quickSearch" title="Quick search (Ctrl+P)">
+            <span style="font-family:var(--mono);font-size:12px;">⌕</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="tree">
+        <div class="section">
+          <div class="node folder"><span class="dot"></span> Recursivitate</div>
+          <div class="indent">
+            <div class="node file"><span class="dot"></span> factorial.pb</div>
+            <div class="node file active"><span class="dot"></span> fibonacci.pb</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="node folder"><span class="dot"></span> Siruri</div>
+          <div class="indent">
+            <div class="node file"><span class="dot"></span> palindrom.pb</div>
+            <div class="node file"><span class="dot"></span> substr.pb</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="node folder"><span class="dot"></span> Divide et Impera</div>
+          <div class="indent">
+            <div class="node file"><span class="dot"></span> merge.pb</div>
+            <div class="node file"><span class="dot"></span> quicksort.pb</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- vertical resizer (between explorer and stage) -->
+      <div class="v-resize" id="resizeExplorer" style="right:-4px;">
+        <div class="grabline"></div>
+      </div>
+    </div>
+
+    <!-- Stage -->
+    <div class="panel stage" id="stagePanel">
+      <div class="panel-header">
+        <div class="hleft"><b>Main Stage</b> <span>Simulation / Theory / Quiz</span></div>
+        <div class="hright">
+          <button class="iconbtn" id="fullscreenStage" title="Fullscreen stage">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <div class="tab active" data-tab="vis">Visualization</div>
+        <div class="tab" data-tab="theory">Theory</div>
+        <div class="tab" data-tab="quiz">Quiz</div>
+      </div>
+
+      <!-- Visualization -->
+      <div class="stage-body active" id="tab-vis">
+        <div class="canvasWrap">
+          <div class="canvasCard">
+            <div class="canvasHUD">
+              <div class="hudLeft">
+                <span class="badge">Mode: Blocks</span>
+                <span class="badge good" id="pipeBlocks">Blocks ✅</span>
+                <span class="badge warn" id="pipeCpp">C++ ⚠</span>
+                <span class="badge" id="pipeTests">Tests ⏳</span>
+              </div>
+              <div class="hudRight">
+                <span class="badge" id="stepBadge">Step: 0</span>
+                <span class="badge" id="speedBadge">Speed: 1x</span>
+              </div>
+            </div>
+
+            <div class="simArea">
+              <!-- Inline SVG: "Compiler" robot + conveyors + cubes -->
+              <svg class="robot" viewBox="0 0 980 520" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="gPanel" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0" stop-color="#1b2a44" stop-opacity=".85"/>
+                    <stop offset="1" stop-color="#0b1220" stop-opacity=".9"/>
+                  </linearGradient>
+                  <linearGradient id="gMetal" x1="0" x2="1">
+                    <stop offset="0" stop-color="#2b3b57"/>
+                    <stop offset=".5" stop-color="#14223a"/>
+                    <stop offset="1" stop-color="#2b3b57"/>
+                  </linearGradient>
+                  <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur stdDeviation="4" result="b"/>
+                    <feMerge>
+                      <feMergeNode in="b"/>
+                      <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                <!-- conveyors -->
+                <g opacity=".95">
+                  <rect x="40" y="360" width="380" height="110" rx="14" fill="url(#gMetal)" stroke="rgba(148,163,184,.18)"/>
+                  <rect x="560" y="360" width="380" height="110" rx="14" fill="url(#gMetal)" stroke="rgba(148,163,184,.18)"/>
+                  <rect x="430" y="390" width="120" height="80" rx="12" fill="rgba(0,0,0,.25)" stroke="rgba(148,163,184,.18)"/>
+                  <!-- belt grid -->
+                  <g opacity=".25" stroke="rgba(148,163,184,.35)">
+                    <path d="M60 385H400M60 410H400M60 435H400" />
+                    <path d="M580 385H920M580 410H920M580 435H920" />
+                    <path d="M450 405H530M450 425H530M450 445H530" />
+                  </g>
+                </g>
+
+                <!-- robot base -->
+                <g>
+                  <rect x="350" y="80" width="280" height="300" rx="26" fill="url(#gMetal)" stroke="rgba(148,163,184,.20)"/>
+                  <rect x="375" y="105" width="230" height="70" rx="16" fill="url(#gPanel)" stroke="rgba(59,130,246,.25)"/>
+                  <text x="490" y="150" text-anchor="middle" font-family="ui-monospace,Menlo,Consolas" font-size="28" fill="#bfdbfe" filter="url(#glow)">&lt; COMPILER &gt;</text>
+
+                  <rect x="395" y="195" width="190" height="80" rx="16" fill="rgba(0,0,0,.22)" stroke="rgba(148,163,184,.18)"/>
+                  <rect x="430" y="215" width="120" height="40" rx="10" fill="rgba(59,130,246,.16)" stroke="rgba(59,130,246,.28)"/>
+                  <text x="490" y="242" text-anchor="middle" font-family="ui-monospace,Menlo,Consolas" font-size="20" fill="#dbeafe">C++</text>
+
+                  <rect x="390" y="290" width="200" height="60" rx="16" fill="rgba(0,0,0,.22)" stroke="rgba(148,163,184,.18)"/>
+                  <text x="490" y="328" text-anchor="middle" font-family="ui-monospace,Menlo,Consolas" font-size="18" fill="#a7f3d0" filter="url(#glow)">— STDOUT —</text>
+                </g>
+
+                <!-- arms -->
+                <g stroke="rgba(148,163,184,.20)" fill="url(#gMetal)">
+                  <!-- left arm -->
+                  <path d="M350 205 C270 230, 230 260, 210 305" stroke-width="28" stroke-linecap="round"/>
+                  <circle cx="210" cy="305" r="26" />
+                  <rect x="150" y="310" width="88" height="40" rx="12" transform="rotate(-18 150 310)"/>
+                  <!-- right arm -->
+                  <path d="M630 205 C710 230, 750 260, 770 305" stroke-width="28" stroke-linecap="round"/>
+                  <circle cx="770" cy="305" r="26" />
+                  <rect x="742" y="310" width="88" height="40" rx="12" transform="rotate(18 742 310)"/>
+                </g>
+
+                <!-- cubes (animated by JS via transforms) -->
+                <g id="cubes" font-family="ui-monospace,Menlo,Consolas" font-weight="700">
+                  <g class="cube" data-track="left" data-value="7">
+                    <rect x="90" y="312" width="56" height="56" rx="10" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.35)"/>
+                    <text x="118" y="348" text-anchor="middle" font-size="24" fill="#fde68a">7</text>
+                  </g>
+                  <g class="cube" data-track="left" data-value="3">
+                    <rect x="170" y="322" width="56" height="56" rx="10" fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.35)"/>
+                    <text x="198" y="358" text-anchor="middle" font-size="24" fill="#fde68a">3</text>
+                  </g>
+                  <g class="cube" data-track="mid" data-value="2">
+                    <rect x="465" y="336" width="56" height="56" rx="10" fill="rgba(59,130,246,.14)" stroke="rgba(59,130,246,.35)"/>
+                    <text x="493" y="372" text-anchor="middle" font-size="24" fill="#bfdbfe">2</text>
+                  </g>
+                  <g class="cube" data-track="right" data-value="5">
+                    <rect x="680" y="322" width="56" height="56" rx="10" fill="rgba(34,197,94,.12)" stroke="rgba(34,197,94,.35)"/>
+                    <text x="708" y="358" text-anchor="middle" font-size="24" fill="#bbf7d0">5</text>
+                  </g>
+                  <g class="cube" data-track="right" data-value="8">
+                    <rect x="780" y="312" width="56" height="56" rx="10" fill="rgba(34,197,94,.12)" stroke="rgba(34,197,94,.35)"/>
+                    <text x="808" y="348" text-anchor="middle" font-size="24" fill="#bbf7d0">8</text>
+                  </g>
+                </g>
+
+                <!-- soft vignette -->
+                <rect x="0" y="0" width="980" height="520" fill="rgba(0,0,0,.10)"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="simControls">
+            <div class="group">
+              <button class="btn" id="stepBack">⟵ Step</button>
+              <button class="btn" id="pauseBtn">⏸ Pause</button>
+              <button class="btn" id="stepFwd">Step ⟶</button>
+            </div>
+            <div class="group">
+              <span>Speed</span>
+              <input type="range" min="0.5" max="2" step="0.5" value="1" id="speed" />
+              <span class="toggle">
+                <input type="checkbox" id="showVars" />
+                <label for="showVars">Show Variables</label>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Theory -->
+      <div class="stage-body" id="tab-theory">
+        <div class="scroll">
+          <div class="card">
+            <h3>Recursion: 5 key points</h3>
+            <ul>
+              <li>Define a base case (terminare).</li>
+              <li>Reduce the problem size at each call.</li>
+              <li>Assume recursive call is correct (induction intuition).</li>
+              <li>Beware of exponential branching (Fibonacci naive).</li>
+              <li>Complexity matters: memoization / DP for Fibonacci.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Template</h3>
+            <pre style="margin:0;color:#dbeafe;font-family:var(--mono);font-size:12px;line-height:1.6;">
+func(n):
+  if base(n): return ...
+  return combine( func(smaller(n)), ... )
+            </pre>
+          </div>
+          <div class="card">
+            <h3>Common pitfalls</h3>
+            <ul>
+              <li>Missing base case → infinite recursion.</li>
+              <li>Base case too weak → wrong answers.</li>
+              <li>Huge recursion depth → stack overflow.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quiz -->
+      <div class="stage-body" id="tab-quiz">
+        <div class="scroll">
+          <div class="q" data-correct="1">
+            <div><b>Q1.</b> Complexity of naive recursive Fibonacci?</div>
+            <div class="answers">
+              <div class="ans">O(n)</div>
+              <div class="ans">O(2^n)</div>
+              <div class="ans">O(n log n)</div>
+            </div>
+            <div class="explain">Naive Fibonacci branches into two calls per level → exponential growth.</div>
+          </div>
+
+          <div class="q" data-correct="0">
+            <div><b>Q2.</b> What must always exist in a recursive function?</div>
+            <div class="answers">
+              <div class="ans">A base case</div>
+              <div class="ans">A loop</div>
+              <div class="ans">Global variables</div>
+            </div>
+            <div class="explain">Without a base case, recursion does not terminate.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- horizontal resizer (between stage and bottom) -->
+      <div class="h-resize" id="resizeBottom" style="bottom:-4px;">
+        <div class="grabline" style="transform:rotate(90deg)"></div>
+      </div>
+
+      <!-- vertical resizer (between stage and studio) -->
+      <div class="v-resize" id="resizeStudio" style="right:-4px;">
+        <div class="grabline"></div>
+      </div>
+    </div>
+
+    <!-- Bottom -->
+    <div class="panel bottom" id="bottomPanel">
+      <div class="panel-header">
+        <div class="hleft"><b>Console</b> <span>Tests / Diff / Performance</span></div>
+        <div class="hright">
+          <button class="iconbtn" id="clearConsole" title="Clear">
+            <span style="font-family:var(--mono);font-size:12px;">CLR</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="bottom-tabs">
+        <div class="tab active" data-btab="console">Console</div>
+        <div class="tab" data-btab="tests">Test Cases</div>
+        <div class="tab" data-btab="diff">Output Diff</div>
+        <div class="tab" data-btab="perf">Performance</div>
+      </div>
+
+      <div class="bottom-body" id="bottomBody">
+        <div class="logline"><span class="status run">Running</span> Ready. Press <span class="kbd">Ctrl+Enter</span> to run.</div>
+        <div class="logline"><span class="status good">Test 1</span> Passed ✔</div>
+        <div class="logline"><span class="status good">Test 2</span> Passed ✔</div>
+        <div class="logline"><span class="status bad">Test 3</span> Failed ✖ — Expected: 55, Got: 34</div>
+        <div class="logline">Time: 0.02s, Memory: 4.1MB</div>
+      </div>
+    </div>
+
+    <!-- Studio -->
+    <div class="studio" id="studioPanel">
+      <!-- Builder -->
+      <div class="panel builder">
+        <div class="panel-header">
+          <div class="hleft"><b>Pseudocode Builder</b> <span>Blocks</span></div>
+          <div class="hright">
+            <button class="iconbtn" id="exportPseudo" title="Export to Pseudocode">⇣</button>
+            <button class="iconbtn" id="exportCpp" title="Generate C++ skeleton">C++</button>
+          </div>
+        </div>
+        <div class="builder-body">
+          <div class="palette" id="palette">
+            <div class="block func" draggable="true" data-kind="start">START <small>entry</small></div>
+            <div class="block control" draggable="true" data-kind="if">IF condition <small>branch</small></div>
+            <div class="block control" draggable="true" data-kind="for">FOR i = 0..n <small>loop</small></div>
+            <div class="block data" draggable="true" data-kind="assign">x = ... <small>assign</small></div>
+            <div class="block io" draggable="true" data-kind="print">PRINT result <small>output</small></div>
+          </div>
+
+          <div class="workspace" id="workspace" aria-label="Drop blocks here">
+            <div class="block func" draggable="true" data-kind="start">START <small>entry</small></div>
+            <div class="block control" draggable="true" data-kind="if">IF (n ≤ 1) return n <small>base case</small></div>
+            <div class="block control" draggable="true" data-kind="assign">return fib(n-1) + fib(n-2) <small>recurse</small></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Editor -->
+      <div class="panel editor">
+        <div class="panel-header">
+          <div class="hleft"><b>Code</b> <span>Logic Flow / Pseudocode / C++</span></div>
+          <div class="hright">
+            <button class="iconbtn" id="toggleReadonly" title="Toggle read-only">RO</button>
+          </div>
+        </div>
+
+        <div class="editor-body">
+          <div class="modebar">
+            <div class="mode" data-mode="flow">Logic Flow</div>
+            <div class="mode active" data-mode="pseudo">Pseudocode</div>
+            <div class="mode" data-mode="cpp">C++</div>
+          </div>
+
+          <div class="codeWrap">
+            <div id="editor"></div>
+            <textarea id="fallback" class="fallback" spellcheck="false" style="display:none;"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- vertical resizer (right edge not needed; but keep alignment) -->
+    </div>
+  </div>
+
+  <script>
+    // ---------- Tabs (Stage) ----------
+    document.querySelectorAll('.tabs .tab').forEach(t => {
+      t.addEventListener('click', () => {
+        document.querySelectorAll('.tabs .tab').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        const key = t.dataset.tab;
+        document.querySelectorAll('.stage-body').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + key).classList.add('active');
+      });
+    });
+
+    // ---------- Quiz interactions ----------
+    document.querySelectorAll('.q').forEach(q => {
+      const correct = Number(q.dataset.correct);
+      const answers = q.querySelectorAll('.ans');
+      const explain = q.querySelector('.explain');
+      answers.forEach((a, idx) => {
+        a.addEventListener('click', () => {
+          answers.forEach(x => x.classList.remove('correct','wrong'));
+          if(idx === correct) a.classList.add('correct');
+          else a.classList.add('wrong');
+          explain.classList.add('show');
+        });
+      });
+    });
+
+    // ---------- Bottom tabs (simple content swap mock) ----------
+    const bottomBody = document.getElementById('bottomBody');
+    document.querySelectorAll('.bottom-tabs .tab').forEach(t => {
+      t.addEventListener('click', () => {
+        document.querySelectorAll('.bottom-tabs .tab').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        const which = t.dataset.btab;
+        if(which === 'console'){
+          bottomBody.innerHTML = `
+            <div class="logline"><span class="status run">Running</span> Ready. Press <span class="kbd">Ctrl+Enter</span> to run.</div>
+            <div class="logline"><span class="status good">Test 1</span> Passed ✔</div>
+            <div class="logline"><span class="status good">Test 2</span> Passed ✔</div>
+            <div class="logline"><span class="status bad">Test 3</span> Failed ✖ — Expected: 55, Got: 34</div>
+            <div class="logline">Time: 0.02s, Memory: 4.1MB</div>
+          `;
+        } else if(which === 'tests'){
+          bottomBody.innerHTML = `
+            <div class="logline"><span class="status good">Test 1</span> input: 10 → output: 55</div>
+            <div class="logline"><span class="status good">Test 2</span> input: 5 → output: 5</div>
+            <div class="logline"><span class="status bad">Test 3</span> input: 9 → output: 34 (expected 34? demo)</div>
+          `;
+        } else if(which === 'diff'){
+          bottomBody.innerHTML = `
+            <div class="logline">Expected: <span style="color:#bbf7d0">55</span></div>
+            <div class="logline">Got: <span style="color:#fecaca">34</span></div>
+            <div class="logline">Diff: <span style="color:#fde68a">mismatch at token 1</span></div>
+          `;
+        } else {
+          bottomBody.innerHTML = `
+            <div class="logline">Compile: 120ms</div>
+            <div class="logline">Run: 20ms</div>
+            <div class="logline">Memory: 4.1MB</div>
+            <div class="logline">Complexity hint: naive fib is exponential.</div>
+          `;
+        }
+      });
+    });
+
+    // ---------- Explorer toggle ----------
+    const explorerPanel = document.getElementById('explorerPanel');
+    document.getElementById('toggleExplorer').addEventListener('click', () => {
+      explorerPanel.style.display = (explorerPanel.style.display === 'none') ? '' : 'none';
+      // When hidden, keep grid sane:
+      const app = document.getElementById('app');
+      if(explorerPanel.style.display === 'none'){
+        app.style.gridTemplateColumns = '1fr 380px';
+        app.style.gridTemplateAreas =
+          `"stage studio"
+           "bottom studio"`;
+      }else{
+        app.style.gridTemplateColumns = '280px 1fr 380px';
+        app.style.gridTemplateAreas =
+          `"explorer stage studio"
+           "explorer bottom studio"`;
+      }
+    });
+
+    // ---------- Simple resizers ----------
+    function makeVResize(handleId, leftPanelEl, rightPanelEl, minLeft, minRight){
+      const handle = document.getElementById(handleId);
+      let dragging = false;
+      handle.addEventListener('mousedown', (e) => { dragging = true; e.preventDefault(); });
+      window.addEventListener('mouseup', () => dragging = false);
+      window.addEventListener('mousemove', (e) => {
+        if(!dragging) return;
+        const rect = leftPanelEl.getBoundingClientRect();
+        const totalRect = rightPanelEl.getBoundingClientRect();
+        const newW = e.clientX - rect.left;
+        const totalW = (totalRect.right - rect.left);
+        const rightW = totalW - newW - 10; // gap approx
+        if(newW < minLeft || rightW < minRight) return;
+        leftPanelEl.style.width = newW + 'px';
+      });
+    }
+    function makeHResize(handleId, topEl, bottomEl, minTop, minBottom){
+      const handle = document.getElementById(handleId);
+      let dragging = false;
+      handle.addEventListener('mousedown', (e) => { dragging = true; e.preventDefault(); });
+      window.addEventListener('mouseup', () => dragging = false);
+      window.addEventListener('mousemove', (e) => {
+        if(!dragging) return;
+        const rect = topEl.getBoundingClientRect();
+        const totalRect = bottomEl.getBoundingClientRect();
+        const newH = e.clientY - rect.top;
+        const totalH = (totalRect.bottom - rect.top);
+        const bottomH = totalH - newH - 10; // gap approx
+        if(newH < minTop || bottomH < minBottom) return;
+        topEl.style.height = newH + 'px';
+      });
+    }
+
+    // Grid-based panels: adjust via inline widths/heights on panels
+    // Explorer width: handled by resizeExplorer
+    makeVResize('resizeExplorer', explorerPanel, document.getElementById('stagePanel'), 220, 480);
+
+    // Stage vs Studio width: resizeStudio drags the stage right edge; easiest: set studio width instead
+    const stagePanel = document.getElementById('stagePanel');
+    const studioPanel = document.getElementById('studioPanel');
+    (function(){
+      const handle = document.getElementById('resizeStudio');
+      let dragging = false;
+      handle.addEventListener('mousedown', (e)=>{dragging=true;e.preventDefault();});
+      window.addEventListener('mouseup', ()=>dragging=false);
+      window.addEventListener('mousemove', (e)=>{
+        if(!dragging) return;
+        const stageRect = stagePanel.getBoundingClientRect();
+        const appRect = document.getElementById('app').getBoundingClientRect();
+        const desiredStudio = appRect.right - e.clientX - 10; // gap
+        if(desiredStudio < 320 || desiredStudio > 560) return;
+        studioPanel.style.width = desiredStudio + 'px';
+      });
+    })();
+
+    // Stage height vs Bottom height
+    makeHResize('resizeBottom', stagePanel, document.getElementById('bottomPanel'), 320, 160);
+
+    // ---------- Drag and drop blocks ----------
+    const palette = document.getElementById('palette');
+    const workspace = document.getElementById('workspace');
+
+    let dragEl = null;
+    let ghost = null;
+
+    function onDragStart(e){
+      dragEl = e.target.closest('.block');
+      if(!dragEl) return;
+      e.dataTransfer.setData('text/plain', dragEl.dataset.kind || '');
+      e.dataTransfer.effectAllowed = 'copyMove';
+      ghost = document.createElement('div');
+      ghost.className = 'block ghost';
+      ghost.textContent = 'drop here';
+      setTimeout(()=> ghost && (ghost.style.height = dragEl.offsetHeight+'px'), 0);
+    }
+
+    function allowDrop(e){ e.preventDefault(); }
+
+    function onDrop(e){
+      e.preventDefault();
+      const kind = e.dataTransfer.getData('text/plain');
+      if(!kind) return;
+
+      // If dropping from palette: clone. If from workspace: move.
+      const fromPalette = palette.contains(dragEl);
+      const newBlock = fromPalette ? dragEl.cloneNode(true) : dragEl;
+
+      newBlock.addEventListener('dragstart', onDragStart);
+      newBlock.draggable = true;
+
+      // Insert at end for simplicity; can be improved with hover insertion.
+      workspace.appendChild(newBlock);
+
+      updatePipelineBadges();
+    }
+
+    document.querySelectorAll('.block').forEach(b => b.addEventListener('dragstart', onDragStart));
+    workspace.addEventListener('dragover', allowDrop);
+    workspace.addEventListener('drop', onDrop);
+
+    // ---------- Representation modes (right editor) ----------
+    const modes = document.querySelectorAll('.mode');
+    const pipeBlocks = document.getElementById('pipeBlocks');
+    const pipeCpp = document.getElementById('pipeCpp');
+
+    let currentMode = 'pseudo';
+    modes.forEach(m => m.addEventListener('click', () => {
+      modes.forEach(x => x.classList.remove('active'));
+      m.classList.add('active');
+      currentMode = m.dataset.mode;
+      setEditorContentFromMode();
+    }));
+
+    // ---------- Monaco (optional) fallback ----------
+    const fallback = document.getElementById('fallback');
+    let monacoEditor = null;
+    let readOnly = false;
+
+    function setValue(text){
+      if(monacoEditor) monacoEditor.setValue(text);
+      else fallback.value = text;
+    }
+    function getValue(){
+      return monacoEditor ? monacoEditor.getValue() : fallback.value;
+    }
+    function setReadonly(ro){
+      readOnly = ro;
+      if(monacoEditor) monacoEditor.updateOptions({ readOnly: ro });
+      else fallback.readOnly = ro;
+    }
+
+    function generatePseudocodeFromBlocks(){
+      const blocks = [...workspace.querySelectorAll('.block')].map(b => b.dataset.kind);
+      const lines = [];
+      for(const k of blocks){
+        if(k === 'start') lines.push('START');
+        if(k === 'if') lines.push('IF (n ≤ 1) THEN return n');
+        if(k === 'for') lines.push('FOR i = 0..n DO ...');
+        if(k === 'assign') lines.push('x = ...');
+        if(k === 'print') lines.push('PRINT result');
+        // custom seeded blocks in workspace
+        if(k === 'assign' && b?.textContent?.includes('return fib')){}
+      }
+      // If user has the seeded recursion line:
+      const hasReturnFib = [...workspace.querySelectorAll('.block')].some(b => (b.textContent || '').includes('return fib'));
+      if(hasReturnFib) lines.push('return fib(n-1) + fib(n-2)');
+      return lines.join('\n');
+    }
+
+    function generateCppSkeleton(){
+      return `#include <bits/stdc++.h>
+using namespace std;
+
+long long fib(long long n){
+  if(n <= 1) return n;
+  return fib(n-1) + fib(n-2);
+}
+
+int main(){
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+
+  long long n;
+  cin >> n;
+  cout << fib(n) << "\\n";
+  return 0;
+}
+`;
+    }
+
+    function setEditorContentFromMode(){
+      if(currentMode === 'flow'){
+        setValue(`START -> IF (n ≤ 1) return n -> return fib(n-1)+fib(n-2) -> END`);
+        setReadonly(true);
+      } else if(currentMode === 'pseudo'){
+        setValue(generatePseudocodeFromBlocks() || 'START\n...');
+        setReadonly(false);
+      } else {
+        setValue(generateCppSkeleton());
+        setReadonly(false);
+      }
+    }
+
+    function updatePipelineBadges(){
+      // simple “validity”: must contain START and something else
+      const kinds = [...workspace.querySelectorAll('.block')].map(b => b.dataset.kind);
+      const okBlocks = kinds.includes('start') && kinds.length >= 2;
+
+      pipeBlocks.textContent = okBlocks ? 'Blocks ✅' : 'Blocks ⚠';
+      pipeBlocks.className = 'badge ' + (okBlocks ? 'good' : 'warn');
+
+      // C++ badge indicates generated vs edited (very rough)
+      pipeCpp.textContent = (currentMode === 'cpp') ? 'C++ ✎' : 'C++ ⚠';
+      pipeCpp.className = 'badge ' + ((currentMode === 'cpp') ? 'good' : 'warn');
+    }
+
+    document.getElementById('exportPseudo').addEventListener('click', () => {
+      currentMode = 'pseudo';
+      modes.forEach(x => x.classList.toggle('active', x.dataset.mode === 'pseudo'));
+      setEditorContentFromMode();
+      updatePipelineBadges();
+    });
+    document.getElementById('exportCpp').addEventListener('click', () => {
+      currentMode = 'cpp';
+      modes.forEach(x => x.classList.toggle('active', x.dataset.mode === 'cpp'));
+      setEditorContentFromMode();
+      updatePipelineBadges();
+    });
+
+    document.getElementById('toggleReadonly').addEventListener('click', () => {
+      setReadonly(!readOnly);
+    });
+
+    // ---------- Simulation: cubes move when stepping ----------
+    let step = 0;
+    const stepBadge = document.getElementById('stepBadge');
+    const speedSlider = document.getElementById('speed');
+    const speedBadge = document.getElementById('speedBadge');
+    let speed = 1;
+
+    speedSlider.addEventListener('input', () => {
+      speed = Number(speedSlider.value);
+      speedBadge.textContent = 'Speed: ' + speed + 'x';
+    });
+
+    function setStep(n){
+      step = Math.max(0, n);
+      stepBadge.textContent = 'Step: ' + step;
+      // simple animation: shift cubes along conveyors based on step
+      document.querySelectorAll('#cubes .cube').forEach((g, idx) => {
+        const track = g.dataset.track;
+        const phase = (step + idx) % 6;
+        let dx = 0, dy = 0, s = 1;
+
+        if(track === 'left'){
+          dx = phase * 34;
+          dy = -Math.sin(phase/6 * Math.PI) * 6;
+        } else if(track === 'mid'){
+          dx = (phase - 2) * 12;
+          dy = Math.cos(phase/6 * Math.PI) * 3;
+          s = 1.03;
+        } else {
+          dx = -(phase * 28);
+          dy = -Math.sin(phase/6 * Math.PI) * 5;
+        }
+        g.style.transition = `transform ${0.25/speed}s cubic-bezier(.2,.9,.2,1)`;
+        g.style.transform = `translate(${dx}px, ${dy}px) scale(${s})`;
+      });
+    }
+
+    document.getElementById('stepBack').addEventListener('click', () => setStep(step-1));
+    document.getElementById('stepFwd').addEventListener('click', () => setStep(step+1));
+
+    let playing = false;
+    let playTimer = null;
+    document.getElementById('pauseBtn').addEventListener('click', () => {
+      playing = !playing;
+      document.getElementById('pauseBtn').textContent = playing ? '⏸ Pause' : '▶ Play';
+      if(playing){
+        playTimer = setInterval(()=> setStep(step+1), 450 / speed);
+      } else {
+        clearInterval(playTimer);
+      }
+    });
+
+    // ---------- Run button: fake compile/run + updates console and simulation ----------
+    const runBtn = document.getElementById('runBtn');
+    const pipeTests = document.getElementById('pipeTests');
+
+    function log(html){
+      const line = document.createElement('div');
+      line.className = 'logline';
+      line.innerHTML = html;
+      bottomBody.prepend(line);
+    }
+
+    function fakeRun(){
+      pipeTests.textContent = 'Tests ⏳';
+      pipeTests.className = 'badge warn';
+      log(`<span class="status run">Running</span> Compiling...`);
+
+      setTimeout(() => {
+        log(`<span class="status run">Running</span> Running tests...`);
+        setStep(step+1);
+      }, 250);
+
+      setTimeout(() => {
+        log(`<span class="status good">Test 1</span> Passed ✔`);
+        setStep(step+1);
+      }, 650);
+
+      setTimeout(() => {
+        log(`<span class="status good">Test 2</span> Passed ✔`);
+        setStep(step+1);
+      }, 980);
+
+      setTimeout(() => {
+        log(`<span class="status bad">Test 3</span> Failed ✖ — Expected: 55, Got: 34`);
+        log(`Time: 0.02s, Memory: 4.1MB`);
+        pipeTests.textContent = 'Tests ❌';
+        pipeTests.className = 'badge bad';
+      }, 1300);
+    }
+
+    runBtn.addEventListener('click', fakeRun);
+
+    // Keyboard shortcuts: Ctrl+Enter run, Ctrl+` toggle bottom, Ctrl+B explorer
+    window.addEventListener('keydown', (e) => {
+      const ctrl = e.ctrlKey || e.metaKey;
+      if(ctrl && e.key === 'Enter'){ e.preventDefault(); fakeRun(); }
+      if(ctrl && e.key.toLowerCase() === 'b'){ e.preventDefault(); document.getElementById('toggleExplorer').click(); }
+      if(ctrl && e.key === '`'){
+        e.preventDefault();
+        const bottom = document.getElementById('bottomPanel');
+        bottom.style.display = (bottom.style.display === 'none') ? '' : 'none';
+      }
+    });
+
+    // Clear console
+    document.getElementById('clearConsole').addEventListener('click', () => {
+      bottomBody.innerHTML = `<div class="logline"><span class="status run">Running</span> Console cleared.</div>`;
+    });
+
+    // Freeze / Reveal (visual overlay mock)
+    let frozen = false;
+    document.getElementById('freezeBtn').addEventListener('click', () => {
+      frozen = !frozen;
+      document.getElementById('freezeBtn').classList.toggle('danger', frozen);
+      document.getElementById('freezeBtn').textContent = frozen ? 'Frozen' : 'Freeze';
+      const card = document.querySelector('.canvasCard');
+      if(frozen){
+        const overlay = document.createElement('div');
+        overlay.id = 'freezeOverlay';
+        overlay.style.cssText = `
+          position:absolute; inset:0; z-index:5;
+          background:rgba(0,0,0,.55);
+          display:grid; place-items:center;
+          font-family:var(--mono);
+          color:#e5e7eb;
+          border-top:1px solid rgba(148,163,184,.20);
+        `;
+        overlay.innerHTML = `<div style="text-align:center">
+          <div style="font-size:18px; letter-spacing:.5px;">SCREEN FROZEN</div>
+          <div style="margin-top:8px; color:var(--muted); font-size:12px;">Hide answers / pause class</div>
+        </div>`;
+        card.appendChild(overlay);
+      } else {
+        document.getElementById('freezeOverlay')?.remove();
+      }
+    });
+
+    document.getElementById('revealBtn').addEventListener('click', () => setStep(step+1));
+
+    // ---------- Initialize editor content ----------
+    function initEditor(){
+      // Monaco if available
+      if(window.require){
+        window.require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+        window.require(['vs/editor/editor.main'], function () {
+          monacoEditor = monaco.editor.create(document.getElementById('editor'), {
+            value: "",
+            language: 'cpp',
+            theme: 'vs-dark',
+            fontFamily: 'JetBrains Mono, Fira Code, ui-monospace, Menlo, Consolas, monospace',
+            fontSize: 12,
+            minimap: { enabled: false },
+            smoothScrolling: true,
+            cursorSmoothCaretAnimation: 'on',
+            padding: { top: 10, bottom: 10 },
+            scrollBeyondLastLine: false,
+          });
+          fallback.style.display = 'none';
+          setEditorContentFromMode();
+          updatePipelineBadges();
+        });
+      } else {
+        // fallback textarea
+        document.getElementById('editor').style.display = 'none';
+        fallback.style.display = 'block';
+        setEditorContentFromMode();
+        updatePipelineBadges();
+      }
+    }
+
+    // ---------- Startup ----------
+    setStep(0);
+    initEditor();
+    updatePipelineBadges();
+  </script>
+</body>
+</html>

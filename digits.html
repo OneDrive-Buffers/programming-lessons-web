@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PBInfo Interactive Lab</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb; --bg: #0f172a; --panel: #1e293b;
+            --text: #f8fafc; --accent: #38bdf8; --success: #10b981;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* Layout */
+        .top-bar { background: var(--primary); padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .main-container { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Left: Problem & Logic Blocks */
+        .sidebar { width: 35%; border-right: 1px solid #334155; padding: 1.5rem; overflow-y: auto; background: var(--panel); }
+        .block-container { background: #020617; padding: 10px; border-radius: 8px; min-height: 100px; margin: 10px 0; border: 2px dashed #334155; }
+        .logic-block { background: var(--primary); padding: 8px 12px; margin: 5px; border-radius: 4px; cursor: grab; display: inline-block; font-family: 'Fira Code'; font-size: 0.8rem; }
+        
+        /* Right: Code Editor & Console */
+        .editor-area { flex: 1; display: flex; flex-direction: column; background: #1e1e1e; }
+        #monaco-container { flex: 1; }
+        .console { height: 200px; background: #000; padding: 1rem; font-family: 'Fira Code'; font-size: 0.9rem; border-top: 2px solid #334155; overflow-y: auto; }
+        
+        /* Buttons */
+        .btn-run { background: var(--success); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-run:hover { opacity: 0.9; }
+        
+        .tab { display: inline-block; padding: 5px 15px; background: #334155; cursor: pointer; border-radius: 4px 4px 0 0; margin-right: 5px; }
+        .tab.active { background: var(--primary); }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div><strong>PB_LAB: Algoritmi Elementari</strong></div>
+    <div>
+        <button class="btn-run" onclick="runCode()">▶ EXECUTE & TEST</button>
+    </div>
+</div>
+
+<div class="main-container">
+    <div class="sidebar">
+        <h2 style="color: var(--accent); margin-top: 0;">#10 nrcif</h2>
+        <p style="font-size: 0.9rem; color: #94a3b8;">
+            <b>Cerință:</b> Determină numărul de cifre ale lui <code>n</code>.
+        </p>
+        <hr style="border: 0; border-top: 1px solid #334155;">
+        
+        <h3>1. Logic Builder</h3>
+        <p style="font-size: 0.8rem;">Trage pașii în ordinea corectă:</p>
+        <div class="block-container" id="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)">
+            </div>
+        <div id="source-blocks">
+            <div class="logic-block" draggable="true" ondragstart="drag(event)" id="b1">n /= 10;</div>
+            <div class="logic-block" draggable="true" ondragstart="drag(event)" id="b2">while (n > 0)</div>
+            <div class="logic-block" draggable="true" ondragstart="drag(event)" id="b3">cnt++;</div>
+            <div class="logic-block" draggable="true" ondragstart="drag(event)" id="b4">cin >> n;</div>
+        </div>
+
+        <h3>2. Test Cases</h3>
+        <div style="font-size: 0.8rem; background: #0f172a; padding: 10px; border-radius: 5px;">
+            Input: <code>1234</code> → Output: <code>4</code><br>
+            Input: <code>0</code> → Output: <code>1</code>
+        </div>
+    </div>
+
+    <div class="editor-area">
+        <div style="padding: 10px; background: #252526;">
+            <div class="tab active">solution.cpp</div>
+            <div class="tab">notes.txt</div>
+        </div>
+        <div id="monaco-container"></div>
+        <div class="console" id="console-output">
+            <span style="color: #666;">// Output console initialized...</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize Monaco Editor
+    let editor;
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+    require(['vs/editor/editor.main'], function () {
+        editor = monaco.editor.create(document.getElementById('monaco-container'), {
+            value: `#include <iostream>\nusing namespace std;\n\nint main() {\n    long long n;\n    int cnt = 0;\n    cin >> n;\n\n    if (n == 0) cnt = 1;\n\n    while (n > 0) {\n        cnt++;\n        n /= 10;\n    }\n\n    cout << cnt;\n    return 0;\n}`,
+            language: 'cpp',
+            theme: 'vs-dark',
+            automaticLayout: true,
+            fontSize: 14,
+            minimap: { enabled: false }
+        });
+    });
+
+    // Drag and Drop Logic
+    function allowDrop(ev) { ev.preventDefault(); }
+    function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+    function drop(ev) {
+        ev.preventDefault();
+        var data = ev.dataTransfer.getData("text");
+        ev.target.appendChild(document.getElementById(data));
+    }
+
+    // "Test" Simulation
+    function runCode() {
+        const consoleOut = document.getElementById('console-output');
+        consoleOut.innerHTML += `<div style="color: var(--accent); margin-top:10px;">> Running Test Cases...</div>`;
+        
+        setTimeout(() => {
+            consoleOut.innerHTML += `<div style="color: var(--success);">✔ Test 1 (1234): Correct Output (4)</div>`;
+            consoleOut.innerHTML += `<div style="color: var(--success);">✔ Test 2 (0): Correct Output (1)</div>`;
+            consoleOut.innerHTML += `<div style="font-weight: bold; color: var(--accent);">Score: 100/100</div>`;
+            consoleOut.scrollTop = consoleOut.scrollHeight;
+        }, 1000);
+    }
+</script>
+</body>
+</html>

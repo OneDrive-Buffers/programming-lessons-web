@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Culegere Probleme Informatică - Elemente de Limbaj</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+    <style>
+        body { background-color: #f8f9fa; }
+        .sidebar { height: 100vh; background: #2c3e50; color: white; position: fixed; width: 250px; overflow-y: auto; }
+        .sidebar a { color: #bdc3c7; text-decoration: none; display: block; padding: 10px 20px; }
+        .sidebar a:hover, .sidebar a.active { background: #34495e; color: #ecf0f1; border-left: 4px solid #3498db; }
+        .sidebar h4 { padding: 20px; margin: 0; background: #1a252f; }
+        .sidebar .chapter { font-size: 0.85em; text-transform: uppercase; color: #95a5a6; padding: 15px 20px 5px; }
+        .content { margin-left: 250px; padding: 30px; }
+        .problem-card { background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 30px; padding: 25px; }
+        .badge-type { background-color: #3498db; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; }
+        .nav-tabs .nav-link.active { font-weight: bold; border-top: 3px solid #3498db; }
+        pre { background: #f4f4f4; padding: 15px; border-radius: 5px; border: 1px solid #ddd; }
+        .output-box { background: #222; color: #0f0; padding: 10px; font-family: monospace; border-radius: 4px; min-height: 40px; }
+        .correct { color: green; font-weight: bold; }
+        .incorrect { color: red; font-weight: bold; }
+        .hidden-section { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h4>InfoProbleme</h4>
+    <div class="chapter">Elemente de limbaj</div>
+    <a href="#" class="nav-link active" onclick="showSection('sectiunea-operatori', this)">1. Operatori și Expresii</a>
+    <a href="#" class="nav-link" onclick="showSection('sectiunea-decizie', this)">2. Structura de Decizie</a>
+    <a href="#" class="nav-link" onclick="showSection('sectiunea-repetitie', this)">3. Structura de Repetiție</a>
+</div>
+
+<div class="content">
+
+    <div id="sectiunea-operatori">
+        <h2 class="mb-4">Lecția 1: Operatori și Expresii</h2>
+
+        <div class="problem-card">
+            <h5><span class="badge-type">Grilă</span> Exercițiul #819 (Bac 2017)</h5>
+            <p>Variabile <code>x</code> și <code>y</code> sunt de tip întreg și memorează numere naturale nenule. Indicați instrucțiunea care poate înlocui punctele de suspensie pentru interschimbarea valorilor.</p>
+            <pre>......
+y=x/y; 
+x=x/y;</pre>
+            <form id="q819">
+                <div class="form-check"><input class="form-check-input" type="radio" name="q819" value="c" id="q819v1"><label class="form-check-label" for="q819v1">Varianta 1: x=x*y;</label></div>
+                <div class="form-check"><input class="form-check-input" type="radio" name="q819" value="w" id="q819v2"><label class="form-check-label" for="q819v2">Varianta 2: x=y/x;</label></div>
+                <div class="form-check"><input class="form-check-input" type="radio" name="q819" value="w" id="q819v3"><label class="form-check-label" for="q819v3">Varianta 3: y=x*y;</label></div>
+                <div class="form-check"><input class="form-check-input" type="radio" name="q819" value="w" id="q819v4"><label class="form-check-label" for="q819v4">Varianta 4: y=y/x;</label></div>
+                <button type="button" class="btn btn-sm btn-primary mt-2" onclick="checkMCQ('q819', 'c')">Verifică</button>
+                <span class="ms-2 result"></span>
+            </form>
+        </div>
+
+        <div class="problem-card">
+            <h5><span class="badge-type">Grilă</span> Exercițiul #1245 (Bac 2021)</h5>
+            <p>Indicați instrucțiunea echivalentă cu: <code>x=-abs(y);</code></p>
+            <form id="q1245">
+                <div class="form-check"><input class="form-check-input" type="radio" name="q1245" value="w" id="q1245v1"><label class="form-check-label" for="q1245v1">1. if(x&lt;0) x=-y; else x=y;</label></div>
+                <div class="form-check"><input class="form-check-input" type="radio" name="q1245" value="c" id="q1245v2"><label class="form-check-label" for="q1245v2">2. if(y&lt;0) x=y; else x=-y;</label></div>
+                <div class="form-check"><input class="form-check-input" type="radio" name="q1245" value="w" id="q1245v3"><label class="form-check-label" for="q1245v3">3. if(x&gt;0) x=-y; else x=y;</label></div>
+                <div class="form-check"><input class="form-check-input" type="radio" name="q1245" value="w" id="q1245v4"><label class="form-check-label" for="q1245v4">4. if(y&gt;0) x=y; else x=-y;</label></div>
+                <button type="button" class="btn btn-sm btn-primary mt-2" onclick="checkMCQ('q1245', 'c')">Verifică</button>
+                <span class="ms-2 result"></span>
+            </form>
+        </div>
+
+        <div class="problem-card">
+            <h5><span class="badge-type">Algoritm</span> Suma celor mai mari 3 numere</h5>
+            
+            <ul class="nav nav-tabs" id="tabSuma3" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#enunt-suma3">Enunț</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#pseudo-suma3">Pseudocod</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#cpp-suma3">C++</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#test-suma3">Testează (JS)</button></li>
+            </ul>
+            
+            <div class="tab-content mt-3">
+                <div class="tab-pane fade show active" id="enunt-suma3">
+                    <p>Se dau 5 numere distincte. Să se determine suma celor mai mari 3 dintre ele.</p>
+                    <strong>Exemplu:</strong> Intrare: <code>1 5 2 3 100</code> -> Ieșire: <code>108</code> (100+5+3)
+                </div>
+                <div class="tab-pane fade" id="pseudo-suma3">
+<pre>
+citește n1, n2, n3, n4, n5
+pune numerele într-un șir V
+sortează descrescător șirul V
+scrie V[1] + V[2] + V[3]
+</pre>
+                </div>
+                <div class="tab-pane fade" id="cpp-suma3">
+<pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+int main() {
+    int v[5];
+    for(int i=0; i<5; i++) cin >> v[i];
+    sort(v, v+5); // Sortează crescător
+    // Ultimele 3 sunt cele mai mari
+    cout << v[2] + v[3] + v[4]; 
+    return 0;
+}
+</code></pre>
+                </div>
+                <div class="tab-pane fade" id="test-suma3">
+                    <input type="text" id="input-suma3" class="form-control mb-2" placeholder="Introdu 5 numere (ex: 1 5 2 3 100)">
+                    <button class="btn btn-success btn-sm" onclick="solveSuma3()">Calculează</button>
+                    <div id="out-suma3" class="output-box mt-2">Rezultat...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="problem-card">
+            <h5><span class="badge-type">Algoritm</span> Poziție și Valoare în Pătrat</h5>
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#enunt-mat">Enunț</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#cpp-mat">C++</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#test-mat">Testează</button></li>
+            </ul>
+            <div class="tab-content mt-3">
+                <div class="tab-pane fade show active" id="enunt-mat">
+                    <p>Se consideră un pătrat nxn numerotat de la 1 la n^2. Determinați:<br>
+                    1. Valoarea V la poziția (x,y).<br>
+                    2. Poziția (i,j) a valorii val.</p>
+                    <strong>Exemplu:</strong> Intrare: <code>4 2 3 12</code> -> Ieșire: <code>7 3 4</code>
+                </div>
+                <div class="tab-pane fade" id="cpp-mat">
+<pre><code class="language-cpp">
+#include &lt;iostream&gt;
+using namespace std;
+int main() {
+    long long n, x, y, val;
+    cin >> n >> x >> y >> val;
+    // 1. Valoarea la x, y
+    // (x-1) linii complete + y coloane
+    cout << (x - 1) * n + y << " ";
+    
+    // 2. Pozitia valorii val
+    long long i, j;
+    if (val % n == 0) {
+        i = val / n;
+        j = n;
+    } else {
+        i = val / n + 1;
+        j = val % n;
+    }
+    cout << i << " " << j;
+    return 0;
+}
+</code></pre>
+                </div>
+                <div class="tab-pane fade" id="test-mat">
+                    <input type="text" id="input-mat" class="form-control mb-2" placeholder="n x y val (ex: 4 2 3 12)">
+                    <button class="btn btn-success btn-sm" onclick="solveMat()">Calculează</button>
+                    <div id="out-mat" class="output-box mt-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="problem-card">
+            <h5><span class="badge-type">Algoritm</span> Cifra din mijloc (3 cifre)</h5>
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#enunt-mid">Enunț</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#cpp-mid">C++</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#test-mid">Testează</button></li>
+            </ul>
+            <div class="tab-content mt-3">
+                <div class="tab-pane fade show active" id="enunt-mid">
+                    <p>Se citește un număr de 3 cifre distincte. Afișați cifra care nu e nici minimă, nici maximă.</p>
+                    <strong>Exemplu:</strong> <code>397</code> -> <code>7</code>
+                </div>
+                <div class="tab-pane fade" id="cpp-mid">
+<pre><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+int main() {
+    int n, v[3];
+    cin >> n;
+    v[0] = n % 10;
+    v[1] = (n / 10) % 10;
+    v[2] = n / 100;
+    sort(v, v+3);
+    cout << v[1]; // Elementul din mijloc dupa sortare
+    return 0;
+}
+</code></pre>
+                </div>
+                <div class="tab-pane fade" id="test-mid">
+                    <input type="number" id="input-mid" class="form-control mb-2" placeholder="Număr 3 cifre (ex: 397)">
+                    <button class="btn btn-success btn-sm" onclick="solveMid()">Execută</button>
+                    <div id="out-mid" class="output-box mt-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sectiunea-decizie" class="hidden-section">
+        <h2 class="mb-4">Lecția 2: Structura de Decizie</h2>
+
+        <div class="problem-card">
+            <h5><span class="badge-type">Algoritm</span> Max/Min din două numere</h5>
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#enunt-cif">Enunț</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#cpp-cif">C++</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#test-cif">Testează</button></li>
+            </ul>
+            <div class="tab-content mt-3">
+                <div class="tab-pane fade show active" id="enunt-cif">
+                    <p>Din două numere de 3 cifre, formați cel mai mare și cel mai mic număr de 2 cifre folosind câte o cifră din fiecare.</p>
+                    <strong>Exemplu:</strong> <code>123 912</code> -> Max: <code>93</code>, Min: <code>11</code>
+                </div>
+                <div class="tab-pane fade" id="cpp-cif">
+<pre><code class="language-cpp">
+// Se extrag cifrele, se afla max pt fiecare numar, apoi se concateneaza
+int maxA = max(a%10, max((a/10)%10, a/100));
+int maxB = max(b%10, max((b/10)%10, b/100));
+cout << maxB << maxA << " "; // Se cere ordine cif_numar1 cif_numar2? Nu, logic matematic.
+// In exemplu 93: 9 din al doilea, 3 din primul. 
+// Atentie: "scris cu o cifră din primul număr și cu o cifră din al doilea".
+// 93 este 9(din b) si 3(din a). Ordinea pentru a forma cel mai mare numar este descrescatoare a cifrelor.
+</code></pre>
+                </div>
+                <div class="tab-pane fade" id="test-cif">
+                    <input type="text" id="input-cif" class="form-control mb-2" placeholder="Doua numere (ex: 123 912)">
+                    <button class="btn btn-success btn-sm" onclick="solveCif()">Execută</button>
+                    <div id="out-cif" class="output-box mt-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="problem-card">
+            <h5><span class="badge-type">Algoritm</span> Comparație Cifra Zecilor</h5>
+            <p>Se citesc a și b. Dacă au aceeași cifră a zecilor, afișați suma. Altfel, afișați numărul cu cifra zecilor mai mare.</p>
+            <div class="row">
+                <div class="col-md-6">
+                    <pre><code class="language-cpp">
+int za = (a / 10) % 10;
+int zb = (b / 10) % 10;
+
+if (za == zb) 
+    cout << a + b;
+else if (za > zb) 
+    cout << a;
+else 
+    cout << b;
+                    </code></pre>
+                </div>
+                <div class="col-md-6">
+                    <input type="text" id="input-zeci" class="form-control mb-2" placeholder="a b (ex: 2023 27)">
+                    <button class="btn btn-success btn-sm" onclick="solveZeci()">Verifică</button>
+                    <div id="out-zeci" class="output-box"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="problem-card">
+            <h5><span class="badge-type">Algoritm</span> Ziua următoare</h5>
+            <p>Intrare: <code>zi luna an</code>. Ieșire: data zilei următoare.</p>
+            <p><strong>Exemplu:</strong> <code>28 2 2000</code> -> <code>29 2 2000</code></p>
+             <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#cpp-date">C++</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#test-date">Testează</button></li>
+            </ul>
+            <div class="tab-content mt-3">
+                <div class="tab-pane fade show active" id="cpp-date">
+<pre><code class="language-cpp">
+// Logică simplificată
+int zileLuna[] = {0,31,28,31,30,31,30,31,31,30,31,30,31};
+if ((an%400==0) || (an%4==0 && an%100!=0)) 
+    zileLuna[2] = 29;
+
+zi++;
+if (zi > zileLuna[luna]) {
+    zi = 1;
+    luna++;
+    if (luna > 12) {
+        luna = 1;
+        an++;
+    }
+}
+cout << zi << " " << luna << " " << an;
+</code></pre>
+                </div>
+                <div class="tab-pane fade" id="test-date">
+                     <input type="text" id="input-date" class="form-control mb-2" placeholder="z l a (ex: 28 2 2000)">
+                    <button class="btn btn-success btn-sm" onclick="solveDate()">Execută</button>
+                    <div id="out-date" class="output-box mt-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="problem-card">
+            <h5><span class="badge-type">Algoritm</span> Tipul Triunghiului</h5>
+            <p>Verifică dacă a, b, c formează triunghi și de ce tip (dreptunghic, ascuțit, obtuz).</p>
+            <input type="text" id="input-tri" class="form-control mb-2" placeholder="a b c (ex: 3 5 4)">
+            <button class="btn btn-success btn-sm" onclick="solveTri()">Verifică</button>
+            <div id="out-tri" class="output-box mt-2"></div>
+        </div>
+    </div>
+
+    <div id="sectiunea-repetitie" class="hidden-section">
+        <h2 class="mb-4">Lecția 3: Structura de Repetiție</h2>
+
+         <div class="problem-card">
+            <h5><span class="badge-type">Grilă</span> Exercițiul #815 (Matrice Generare)</h5>
+            <p>Se dorește afișarea unei matrice 5x5 cu <code>1</code> pe margini și <code>2</code> în interior. Ce condiție completăm în <code>if</code>?</p>
+            <pre>
+for(i=0;i&lt;5;i++)
+  for(j=0;j&lt;5;j++)
+    if(...........) cout&lt;&lt;"1 ";
+    else cout&lt;&lt;"2 ";
+            </pre>
+            <form id="q815">
+                <div class="form-check"><input class="form-check-input" type="radio" name="q815" value="c" id="q815v1"><label class="form-check-label" for="q815v1">1. (4-i)%4==0 || (4-j)%4==0</label></div>
+                <div class="form-check"><input class="form-check-input" type="radio" name="q815" value="w" id="q815v2"><label class="form-check-label" for="q815v2">2. (4-i)%4==0 && (4-j)%4==0</label></div>
+                <div class="form-check"><input class="form-check-input" type="radio" name="q815" value="w" id="q815v3"><label class="form-check-label" for="q815v3">3. (4-i)%4!=0 || (4-j)%4!=0</label></div>
+                <button type="button" class="btn btn-sm btn-primary mt-2" onclick="checkMCQ('q815', 'c')">Verifică</button>
+                <span class="ms-2 result"></span>
+            </form>
+        </div>
+
+        <div class="problem-card">
+            <h5><span class="badge-type">Grilă</span> Exercițiul #977 (Ultima cifră 4^n)</h5>
+            <p>Care secvențe calculează corect ultima cifră a lui 4^n? (S1: logică paritate, S2: înmulțire iterativă modulo 10, S3: înmulțire greșită).</p>
+            <form id="q977">
+                <div class="form-check"><input class="form-check-input" type="radio" name="q977" value="c" id="q977v1"><label class="form-check-label" for="q977v1">Varianta 1: S1 și S2</label></div>
+                <div class="form-check"><input class="form-check-input" type="radio" name="q977" value="w" id="q977v2"><label class="form-check-label" for="q977v2">Varianta 2: S1 și S3</label></div>
+                <div class="form-check"><input class="form-check-input" type="radio" name="q977" value="w" id="q977v3"><label class="form-check-label" for="q977v3">Varianta 3: S2 și S3</label></div>
+                <button type="button" class="btn btn-sm btn-primary mt-2" onclick="checkMCQ('q977', 'c')">Verifică</button>
+                <span class="ms-2 result"></span>
+            </form>
+        </div>
+
+        <div class="problem-card">
+            <h5><span class="badge-type">Algoritm</span> Divizibilitate (2, 3, mixt)</h5>
+            <p>Se dă <code>n</code>. Afișați numerele divizibile cu 2, apoi cele cu 3, apoi cele cu 2 sau 3 dar NU 6.</p>
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#cpp-div">C++</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#test-div">Testează</button></li>
+            </ul>
+            <div class="tab-content mt-3">
+                <div class="tab-pane fade show active" id="cpp-div">
+<pre><code class="language-cpp">
+// Linia 1: div 2
+for(int i=1; i<=n; i++) if(i%2==0) cout << i << " ";
+cout << endl;
+// Linia 2: div 3
+for(int i=1; i<=n; i++) if(i%3==0) cout << i << " ";
+cout << endl;
+// Linia 3: (div 2 sau div 3) si ! div 6
+for(int i=1; i<=n; i++) 
+    if((i%2==0 || i%3==0) && i%6!=0) cout << i << " ";
+</code></pre>
+                </div>
+                <div class="tab-pane fade" id="test-div">
+                    <input type="number" id="input-div" class="form-control mb-2" placeholder="n (ex: 21)">
+                    <button class="btn btn-success btn-sm" onclick="solveDiv()">Execută</button>
+                    <div id="out-div" class="output-box mt-2" style="white-space: pre;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="problem-card">
+            <h5><span class="badge-type">Algoritm</span> Romb din Cifre</h5>
+            <p>Se dă <code>n</code> (cifră). Afișați un romb.</p>
+            <input type="number" id="input-romb" class="form-control mb-2" placeholder="n (ex: 5)">
+            <button class="btn btn-success btn-sm" onclick="solveRomb()">Desenează</button>
+            <div id="out-romb" class="output-box mt-2" style="white-space: pre; line-height: 1;"></div>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+
+<script>
+    // Navigation Logic
+    function showSection(sectionId, linkElement) {
+        document.getElementById('sectiunea-operatori').classList.add('hidden-section');
+        document.getElementById('sectiunea-decizie').classList.add('hidden-section');
+        document.getElementById('sectiunea-repetitie').classList.add('hidden-section');
+        document.getElementById(sectionId).classList.remove('hidden-section');
+        
+        document.querySelectorAll('.sidebar a').forEach(el => el.classList.remove('active'));
+        linkElement.classList.add('active');
+        window.scrollTo(0,0);
+    }
+
+    // MCQ Checker Logic
+    function checkMCQ(formId, correctVal) {
+        const selected = document.querySelector(`input[name="${formId}"]:checked`);
+        const resultSpan = document.querySelector(`#${formId} .result`);
+        if (!selected) {
+            resultSpan.textContent = "Selectează o variantă!";
+            resultSpan.className = "ms-2 result text-warning";
+            return;
+        }
+        if (selected.value === correctVal) {
+            resultSpan.textContent = "Corect!";
+            resultSpan.className = "ms-2 result correct";
+        } else {
+            resultSpan.textContent = "Greșit.";
+            resultSpan.className = "ms-2 result incorrect";
+        }
+    }
+
+    // --- JS Solvers for Interactive Parts ---
+
+    function solveSuma3() {
+        const input = document.getElementById('input-suma3').value;
+        const parts = input.trim().split(/\s+/).map(Number);
+        if (parts.length < 5) {
+            document.getElementById('out-suma3').textContent = "Introdu 5 numere!";
+            return;
+        }
+        parts.sort((a,b) => b-a);
+        const sum = parts[0] + parts[1] + parts[2];
+        document.getElementById('out-suma3').textContent = sum;
+    }
+
+    function solveMat() {
+        const input = document.getElementById('input-mat').value.trim().split(/\s+/).map(Number);
+        if (input.length < 4) return;
+        const [n, x, y, val] = input;
+        
+        // 1. Val la (x,y)
+        const V = (x-1)*n + y;
+        
+        // 2. Poz lui val
+        let i, j;
+        if (val % n === 0) {
+            i = Math.floor(val/n);
+            j = n;
+        } else {
+            i = Math.floor(val/n) + 1;
+            j = val % n;
+        }
+        document.getElementById('out-mat').textContent = `${V} ${i} ${j}`;
+    }
+
+    function solveMid() {
+        let n = parseInt(document.getElementById('input-mid').value);
+        if (isNaN(n) || n < 100 || n > 999) {
+             document.getElementById('out-mid').textContent = "Număr invalid."; return;
+        }
+        let arr = [Math.floor(n/100), Math.floor((n/10)%10), n%10];
+        arr.sort((a,b) => a-b);
+        document.getElementById('out-mid').textContent = arr[1];
+    }
+
+    function solveCif() {
+        const parts = document.getElementById('input-cif').value.trim().split(/\s+/).map(Number);
+        if(parts.length < 2) return;
+        const a = parts[0], b = parts[1];
+        
+        const digitsA = [Math.floor(a/100), Math.floor((a/10)%10), a%10];
+        const digitsB = [Math.floor(b/100), Math.floor((b/10)%10), b%10];
+        
+        const maxA = Math.max(...digitsA);
+        const maxB = Math.max(...digitsB);
+        const minA = Math.min(...digitsA);
+        const minB = Math.min(...digitsB);
+        
+        // Pt cel mai mare numar: cifra mare din primul + cifra mare din al doilea?
+        // Problema zice "cel mai mare numar de doua cifre scris cu o cifra din primul si una din al doilea".
+        // Pentru a maximiza XY, X trebuie sa fie max posibil dintre optiuni, Y max posibil ramas.
+        // Dar enunțul zice "scris cu o cifra din primul SI una din al doilea".
+        // Deci combinam maxA cu maxB. Pt a fi maxim, punem cifra mai mare pe zeci.
+        // DAR exemplul 123 912 -> Output 93. 9 e din B, 3 e din A.
+        // Deci se formeaza din MaxGlobal si MaxLocal.
+        
+        let candidates = [];
+        // Toate combinatiile o cifra din A, una din B
+        for(let da of digitsA) {
+            for(let db of digitsB) {
+                candidates.push(da*10+db);
+                candidates.push(db*10+da);
+            }
+        }
+        candidates.sort((x,y) => x-y);
+        
+        // Enuntul e vag la "in aceasta ordine". Exemplul zice 93 si 11.
+        // 93 = 9 (din B) si 3 (din A).
+        // Se pare ca se cere Max absolut si Min absolut format din combinatii.
+        document.getElementById('out-cif').textContent = `${candidates[candidates.length-1]} ${candidates[0]}`;
+    }
+
+    function solveZeci() {
+        const parts = document.getElementById('input-zeci').value.trim().split(/\s+/).map(Number);
+        const a = parts[0], b = parts[1];
+        const za = Math.floor((a/10)%10);
+        const zb = Math.floor((b/10)%10);
+        
+        if (za === zb) document.getElementById('out-zeci').textContent = a+b;
+        else document.getElementById('out-zeci').textContent = (za > zb ? a : b);
+    }
+
+    function solveDate() {
+        const parts = document.getElementById('input-date').value.trim().split(/\s+/).map(Number);
+        let d = parts[0], m = parts[1], y = parts[2];
+        
+        let daysInMonth = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        if ((y % 400 == 0) || (y % 4 == 0 && y % 100 != 0)) daysInMonth[2] = 29;
+        
+        d++;
+        if (d > daysInMonth[m]) {
+            d = 1; m++;
+            if (m > 12) { m = 1; y++; }
+        }
+        document.getElementById('out-date').textContent = `${d} ${m} ${y}`;
+    }
+
+    function solveTri() {
+        const parts = document.getElementById('input-tri').value.trim().split(/\s+/).map(Number);
+        parts.sort((a,b)=>a-b);
+        const a=parts[0], b=parts[1], c=parts[2];
+        
+        const out = document.getElementById('out-tri');
+        if (a + b <= c) {
+            out.textContent = "nu este triunghi";
+            return;
+        }
+        const a2b2 = a*a + b*b;
+        const c2 = c*c;
+        if (a2b2 === c2) out.textContent = "triunghi dreptunghic";
+        else if (a2b2 > c2) out.textContent = "triunghi ascutitunghic";
+        else out.textContent = "triunghi obtuzunghic";
+    }
+
+    function solveDiv() {
+        const n = parseInt(document.getElementById('input-div').value);
+        let r1 = [], r2 = [], r3 = [];
+        for(let i=1; i<=n; i++) {
+            if(i%2===0) r1.push(i);
+            if(i%3===0) r2.push(i);
+            if((i%2===0 || i%3===0) && i%6!==0) r3.push(i);
+        }
+        document.getElementById('out-div').textContent = `${r1.join(' ')}\n${r2.join(' ')}\n${r3.join(' ')}`;
+    }
+
+    function solveRomb() {
+        const n = parseInt(document.getElementById('input-romb').value);
+        let str = "";
+        // Parte superioara + mijloc
+        for (let i = 1; i <= n; i++) {
+            let spatii = " ".repeat(n - i);
+            let cifre = String(i).repeat(2 * i - 1);
+            str += spatii + cifre + "\n";
+        }
+        // Parte inferioara
+        for (let i = n - 1; i >= 1; i--) {
+            let spatii = " ".repeat(n - i);
+            let cifre = String(i).repeat(2 * i - 1);
+            str += spatii + cifre + "\n";
+        }
+        document.getElementById('out-romb').textContent = str;
+    }
+</script>
+
+</body>
+</html>

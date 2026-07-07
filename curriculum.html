@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDU-LAB: Informatică Clasa a IX-a</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f1f5f9; --bg-sidebar: #ffffff;
+            --primary: #2563eb; --accent: #3b82f6;
+            --text-dark: #1e293b; --text-light: #64748b;
+            --success: #10b981; --border: #e2e8f0;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-main); color: var(--text-dark); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        /* Left Navigation - Curriculum Style */
+        .curriculum-sidebar { width: 320px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
+        .header { padding: 20px; border-bottom: 1px solid var(--border); background: var(--primary); color: white; }
+        .curriculum-content { flex: 1; overflow-y: auto; padding: 10px; }
+        .module-title { font-size: 0.75rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin: 20px 0 10px 10px; letter-spacing: 1px; }
+        .problem-item { 
+            padding: 12px 15px; margin-bottom: 4px; border-radius: 8px; cursor: pointer; 
+            font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center;
+            transition: all 0.2s; border: 1px solid transparent;
+        }
+        .problem-item:hover { background: #f8fafc; border-color: var(--border); }
+        .problem-item.active { background: #eff6ff; border-color: var(--accent); color: var(--primary); font-weight: 600; }
+        .diff-tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: #e2e8f0; color: #475569; }
+
+        /* Center Content - Lesson Style */
+        .lesson-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: white; margin: 15px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); border: 1px solid var(--border); }
+        .lesson-header { padding: 20px 30px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .lesson-body { display: flex; flex: 1; overflow: hidden; }
+
+        /* Logic & Problem Section */
+        .problem-panel { width: 45%; padding: 25px; overflow-y: auto; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .logic-builder { background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; min-height: 150px; padding: 15px; margin: 15px 0; }
+        .logic-block { 
+            background: white; border: 1px solid var(--border); padding: 10px 15px; 
+            margin-bottom: 8px; border-radius: 6px; cursor: grab; font-family: 'Fira Code'; 
+            font-size: 0.85rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: transform 0.1s;
+        }
+        .logic-block:hover { border-color: var(--accent); color: var(--primary); }
+
+        /* Code Section */
+        .code-panel { flex: 1; display: flex; flex-direction: column; background: #1e1e1e; }
+        #monaco-container { flex: 1; }
+        .terminal { height: 180px; background: #0f172a; color: #e2e8f0; padding: 15px; font-family: 'Fira Code'; font-size: 0.85rem; overflow-y: auto; border-top: 4px solid #334155; }
+
+        .btn-run { background: var(--success); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+        .btn-run:hover { opacity: 0.9; }
+
+        code { background: #f1f5f9; padding: 2px 5px; border-radius: 4px; font-family: 'Fira Code'; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+
+<div class="curriculum-sidebar">
+    <div class="header">
+        <h2 style="margin:0; font-size: 1.2rem;">Laborator Info IX</h2>
+        <div style="font-size: 0.8rem; opacity: 0.8;">Liceul Digital v2026</div>
+    </div>
+    
+    <div class="curriculum-content">
+        <div class="module-title">1. Structura de Decizie</div>
+        <div class="problem-item active" onclick="loadProblem('nrcif')">
+            <span>#105 max2</span>
+            <span class="diff-tag">Ușoară</span>
+        </div>
+        <div class="problem-item" onclick="loadProblem('paritate')">
+            <span>#109 Paritate</span>
+            <span class="diff-tag">Ușoară</span>
+        </div>
+        <div class="problem-item" onclick="loadProblem('bisect')">
+            <span>#177 Bisect</span>
+            <span class="diff-tag">Ușoară</span>
+        </div>
+
+        <div class="module-title">2. Maxime și Minime</div>
+        <div class="problem-item" onclick="loadProblem('n_maxim')">
+            <span>#354 n_maxim</span>
+            <span class="diff-tag">Ușoară</span>
+        </div>
+        <div class="problem-item" onclick="loadProblem('difMin')">
+            <span>#172 difMin</span>
+            <span class="diff-tag" style="background: #fef3c7; color: #92400e;">Medie</span>
+        </div>
+
+        <div class="module-title">3. Sume și Produse</div>
+        <div class="problem-item" onclick="loadProblem('sumapare')">
+            <span>#46 SumaPare</span>
+            <span class="diff-tag">Ușoară</span>
+        </div>
+        <div class="problem-item" onclick="loadProblem('factorial')">
+            <span>#49 Factorial</span>
+            <span class="diff-tag">Ușoară</span>
+        </div>
+    </div>
+</div>
+
+<div class="lesson-container">
+    <div class="lesson-header">
+        <div>
+            <h1 id="p-title" style="margin:0; font-size: 1.5rem; color: var(--primary);">#105 Maximul a două numere (max2)</h1>
+            <div id="p-cat" style="color: var(--text-light); font-size: 0.9rem;">Capitolul: Structura de decizie</div>
+        </div>
+        <button class="btn-run" onclick="runSimulation()">VERIFICĂ SOLUȚIA</button>
+    </div>
+
+    <div class="lesson-body">
+        <div class="problem-panel">
+            <h3 style="margin-top:0;">Cerință</h3>
+            <p id="p-desc" style="line-height: 1.6; color: #475569;">
+                Se citesc două numere întregi de la tastatură. Să se afișeze cel mai mare dintre ele.
+            </p>
+
+            <div style="background: #f8fafc; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                <b style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-light);">Exemplu:</b><br>
+                <code>Intrare: 5 9</code> &nbsp; → &nbsp; <code>Ieșire: 9</code>
+            </div>
+
+            <h3>Etapa 1: Logic Builder</h3>
+            <p style="font-size: 0.85rem; color: var(--text-light);">Trage instrucțiunile în <b>Zona de Construcție</b> în ordinea logică a execuției:</p>
+            
+            <div class="logic-builder" id="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)">
+                </div>
+
+            <div id="source-blocks" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                </div>
+            
+            
+        </div>
+
+        <div class="code-panel">
+            <div id="monaco-container"></div>
+            <div class="terminal" id="terminal">
+                <div style="color: #64748b;">// Consola sistemului EDU-LAB</div>
+                <div style="color: #64748b;">// Așteaptă asamblarea logicii...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let editor;
+    const problems = {
+        'nrcif': {
+            title: '#105 max2 (Maximul a două numere)',
+            desc: 'Se citesc două numere întregi <code>a</code> și <code>b</code>. Să se afișeze cel mai mare dintre ele.',
+            blocks: [
+                { id: 'in', text: 'cin >> a >> b;' },
+                { id: 'if', text: 'if (a > b)' },
+                { id: 'out_a', text: 'cout << a;' },
+                { id: 'else', text: 'else' },
+                { id: 'out_b', text: 'cout << b;' }
+            ],
+            correct: ['in', 'if', 'out_a', 'else', 'out_b'],
+            template: (logic) => `#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n${logic}\n    return 0;\n}`
+        },
+        'sumapare': {
+            title: '#46 SumaPare',
+            desc: 'Să se determine suma primelor <code>n</code> numere pare naturale.',
+            blocks: [
+                { id: 'in', text: 'cin >> n;' },
+                { id: 'calc', text: 'S = n * (n + 1);' },
+                { id: 'out', text: 'cout << S;' }
+            ],
+            correct: ['in', 'calc', 'out'],
+            template: (logic) => `#include <iostream>\nusing namespace std;\n\nint main() {\n    long long n, S = 0;\n${logic}\n    return 0;\n}`
+        }
+    };
+
+    let currentProblem = 'nrcif';
+
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+    require(['vs/editor/editor.main'], function () {
+        editor = monaco.editor.create(document.getElementById('monaco-container'), {
+            value: problems['nrcif'].template('\n    // Trage blocurile de logică în stânga...'),
+            language: 'cpp', theme: 'vs-dark', automaticLayout: true, fontSize: 14, minimap: { enabled: false }
+        });
+        loadProblem('nrcif');
+    });
+
+    function loadProblem(id) {
+        currentProblem = id;
+        const p = problems[id];
+        document.getElementById('p-title').innerText = p.title;
+        document.getElementById('p-desc').innerHTML = p.desc;
+        
+        const source = document.getElementById('source-blocks');
+        const dropZone = document.getElementById('drop-zone');
+        source.innerHTML = '';
+        dropZone.innerHTML = '';
+        
+        p.blocks.forEach(b => {
+            const el = document.createElement('div');
+            el.className = 'logic-block';
+            el.draggable = true;
+            el.id = b.id;
+            el.innerText = b.text;
+            el.ondragstart = drag;
+            source.appendChild(el);
+        });
+        
+        editor.setValue(p.template('\n    // Reconstruiește algoritmul...'));
+    }
+
+    function allowDrop(ev) { ev.preventDefault(); }
+    function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+    function drop(ev) {
+        ev.preventDefault();
+        const data = ev.dataTransfer.getData("text");
+        document.getElementById('drop-zone').appendChild(document.getElementById(data));
+        updateCode();
+    }
+
+    function updateCode() {
+        const dropZone = document.getElementById('drop-zone');
+        const blocks = Array.from(dropZone.children);
+        let logicCode = "";
+        
+        blocks.forEach(b => {
+            const p = problems[currentProblem];
+            const blockData = p.blocks.find(x => x.id === b.id);
+            let indent = "    ";
+            if (b.id.includes('out')) indent = "        ";
+            logicCode += `${indent}${blockData.text}\n`;
+        });
+
+        editor.setValue(problems[currentProblem].template(logicCode));
+    }
+
+    function runSimulation() {
+        const term = document.getElementById('terminal');
+        const dropZone = document.getElementById('drop-zone');
+        const userOrder = Array.from(dropZone.children).map(b => b.id);
+        const correct = problems[currentProblem].correct;
+
+        term.innerHTML = `<div style="color: #38bdf8;">[Sistem] Compilare în curs...</div>`;
+        
+        setTimeout(() => {
+            if (JSON.stringify(userOrder) === JSON.stringify(correct)) {
+                term.innerHTML += `<div style="color: var(--success);">[OK] Compilare reușită.</div>`;
+                term.innerHTML += `<div style="color: var(--success);">[OK] Teste trecute: 100/100 puncte!</div>`;
+            } else {
+                term.innerHTML += `<div style="color: #f87171;">[EROARE] Eroare logică. Verifică ordinea instrucțiunilor.</div>`;
+                term.innerHTML += `<div style="color: #94a3b8; font-size: 0.75rem;">Sugestie: Citește datele înainte de a le prelucra!</div>`;
+            }
+        }, 1000);
+    }
+</script>
+</body>
+</html>
